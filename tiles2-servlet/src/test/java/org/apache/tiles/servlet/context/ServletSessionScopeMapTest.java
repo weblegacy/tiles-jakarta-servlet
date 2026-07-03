@@ -21,33 +21,27 @@
 
 package org.apache.tiles.servlet.context;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.Map;
 import java.util.Vector;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import junit.framework.TestCase;
 import org.easymock.EasyMock;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests {@link ServletSessionScopeMap} behavior.
  *
  * @version $Rev$ $Date$
  */
-public class ServletSessionScopeMapTest extends TestCase {
-
-    /**
-     * Constructor.
-     *
-     * @param testName The name of the test.
-     */
-    public ServletSessionScopeMapTest(String testName) {
-        super(testName);
-    }
+public class ServletSessionScopeMapTest {
 
     /**
      * Tests if the session object is used correctly inside
      * {@link ServletSessionScopeMap}.
      */
+    @Test
     public void testSessionUse() {
         HttpServletRequest request = EasyMock.createMock(
                 HttpServletRequest.class);
@@ -57,15 +51,15 @@ public class ServletSessionScopeMapTest extends TestCase {
         EasyMock.expect(session.getAttribute("testAttribute")).andReturn(null);
         session.setAttribute("testAttribute", "testValue");
         EasyMock.expect(request.getSession(false)).andReturn(session).anyTimes();
-        Vector<String> v = new Vector<String>();
+        Vector<String> v = new Vector<>();
         v.add("testAttribute");
         EasyMock.expect(session.getAttributeNames()).andReturn(v.elements());
         EasyMock.replay(request);
         EasyMock.replay(session);
 
         Map<String, Object> map = new ServletSessionScopeMap(request);
-        assertEquals("The map is not empty", 0, map.size());
+        assertEquals(0, map.size(), "The map is not empty");
         map.put("testAttribute", "testValue");
-        assertEquals("The map has not one attribute", 1, map.size());
+        assertEquals(1, map.size(), "The map has not one attribute");
     }
 }

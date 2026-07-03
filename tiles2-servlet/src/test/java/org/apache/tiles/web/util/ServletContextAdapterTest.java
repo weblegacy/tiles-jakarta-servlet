@@ -21,28 +21,34 @@
 
 package org.apache.tiles.web.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
-import junit.framework.TestCase;
 import org.apache.tiles.servlet.mock.MockServletConfig;
 import org.apache.tiles.servlet.mock.MockServletContext;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests {@link ServletContextAdapter}.
  *
  * @version $Rev$ $Date$
  */
-public class ServletContextAdapterTest extends TestCase {
+public class ServletContextAdapterTest {
 
     /**
      * The context to test.
      */
     private ServletContextAdapter context;
 
-    /** {@inheritDoc} */
-    @Override
-    protected void setUp() throws Exception {
+    /**
+     * Method is executed <i>before</i> <b>each</b> {@code @Test} method in the current class.
+     */
+    @BeforeEach
+    public void setUp() throws Exception {
         MockServletContext rootContext = new MockServletContext();
         rootContext.addInitParameter("initParameter1", "parameterValue1");
         rootContext.addInitParameter("initParameter2", "parameterValue2");
@@ -55,19 +61,19 @@ public class ServletContextAdapterTest extends TestCase {
     /**
      * Test init parameters.
      */
-    @SuppressWarnings("unchecked")
+    @Test
     public void testGetInitParameters() {
-        assertEquals(context.getInitParameter("initParameter1"), "newParameterValue1");
-        assertEquals(context.getInitParameter("initParameter2"), "parameterValue2");
-        assertEquals(context.getInitParameter("newInitParameter"), "newParameterValue2");
+        assertEquals("newParameterValue1", context.getInitParameter("initParameter1"));
+        assertEquals("parameterValue2", context.getInitParameter("initParameter2"));
+        assertEquals("newParameterValue2", context.getInitParameter("newInitParameter"));
 
         Set<String> paramSet = new HashSet<String>();
         paramSet.add("initParameter1");
         paramSet.add("initParameter2");
         paramSet.add("newInitParameter");
-        Enumeration<String> names = context.getInitParameterNames();
+        Enumeration<?> names = context.getInitParameterNames();
         while (names.hasMoreElements()) {
-            String name = names.nextElement();
+            String name = names.nextElement().toString();
             assertTrue(paramSet.contains(name));
             paramSet.remove(name);
         }

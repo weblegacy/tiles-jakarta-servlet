@@ -21,6 +21,8 @@
 
 package org.apache.tiles.servlet.wildcard;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -30,15 +32,17 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 import javax.servlet.ServletContext;
-import junit.framework.TestCase;
 import org.easymock.EasyMock;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests {@link WildcardServletTilesApplicationContext}.
  *
  * @version $Rev$ $Date$
  */
-public class WildcardServletTilesApplicationContextTest extends TestCase {
+public class WildcardServletTilesApplicationContextTest {
 
     /**
      * Number of properties container inside the test.properties file.
@@ -60,8 +64,10 @@ public class WildcardServletTilesApplicationContextTest extends TestCase {
      */
     private ClassLoader original;
 
-    /** {@inheritDoc} */
-    @Override
+    /**
+     * Method is executed <i>before</i> <b>each</b> {@code @Test} method in the current class.
+     */
+    @BeforeEach
     public void setUp() {
         servletContext = EasyMock.createMock(ServletContext.class);
         original = Thread.currentThread().getContextClassLoader();
@@ -73,9 +79,11 @@ public class WildcardServletTilesApplicationContextTest extends TestCase {
         context = new WildcardServletTilesApplicationContext(servletContext);
     }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void tearDown() throws Exception {
+    /**
+     * Method is executed <i>after</i> <b>each</b> {@code @Test} method in the current class.
+     */
+    @AfterEach
+    public void tearDown() throws Exception {
         Thread.currentThread().setContextClassLoader(original);
     }
 
@@ -84,6 +92,7 @@ public class WildcardServletTilesApplicationContextTest extends TestCase {
      *
      * @throws IOException If something goes wrong.
      */
+    @Test
     public void testGetResources() throws IOException {
         String url = "test.properties";
         HashSet<URL> set = new HashSet<URL>();
