@@ -1,4 +1,3 @@
-<!--
 /*
  * $Id$
  *
@@ -19,16 +18,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
--->
-<html>
-<head>
-    <title>Deprecated package for Tiles servlet-specific context package with wildcard support</title>
-</head>
-<body>
-<p>This package contains deprecated classes and interfaces that allow to access the various contexts from a servlet
-application. These classes can manage resource getting through the use of
-Spring-like wildcards patterns.
-</p>
-<p>Please use org.apache.tiles.servlet.wildcard package.</p>
-</body>
-</html>
+
+/**
+ * This package contains deprecated classes and interfaces that allow to access the various
+ * contexts from a servlet application. These classes can manage resource getting through the use
+ * of Spring-like wildcards patterns.
+ *
+ * <p>Please use {@link org.apache.tiles.servlet.wildcard} package.</p>
+ */
+package org.apache.tiles.servlet.context.wildcard;

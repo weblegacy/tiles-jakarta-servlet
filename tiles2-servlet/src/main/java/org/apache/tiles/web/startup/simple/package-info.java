@@ -1,4 +1,3 @@
-<!--
 /*
  * $Id$
  *
@@ -19,12 +18,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
--->
-<html>
-<head>
-    <title>Start-up classes in a web application environment</title>
-</head>
-<body>
-Classes to start the Tiles engine up in a web environment.
-</body>
-</html>
+
+/**
+ * Classes to start the Tiles engine up in a web environment using the default settings.
+ */
+package org.apache.tiles.web.startup.simple;

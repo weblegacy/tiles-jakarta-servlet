@@ -1,4 +1,3 @@
-<!--
 /*
  * $Id$
  *
@@ -19,14 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
--->
-<html>
-<head>
-    <title>Tiles servlet-specific context package with wildcard support</title>
-</head>
-<body>
-Classes and interfaces that allow to access the various contexts from a servlet
-application. These classes can manage resource getting through the use of
-Spring-like wildcards patterns.
-</body>
-</html>
+
+/**
+ * Classes and interfaces that allow to access the various contexts from a servlet application.
+ * These classes can manage resource getting through the use of Spring-like wildcards patterns.
+ */
+package org.apache.tiles.servlet.wildcard;

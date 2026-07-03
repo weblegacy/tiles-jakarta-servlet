@@ -1,4 +1,3 @@
-<!--
 /*
  * $Id$
  *
@@ -19,12 +18,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
--->
-<html>
-<head>
-    <title>Web utilities</title>
-</head>
-<body>
-Utility classes to use Tiles in a servlet environment.
-</body>
-</html>
+
+/**
+ * Classes to start the Tiles engine up in a web environment.
+ */
+package org.apache.tiles.web.startup;

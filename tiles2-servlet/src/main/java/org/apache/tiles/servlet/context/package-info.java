@@ -1,4 +1,3 @@
-<!--
 /*
  * $Id$
  *
@@ -19,13 +18,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
--->
-<html>
-<head>
-    <title>Tiles servlet-specific context package</title>
-</head>
-<body>
-Classes and interfaces that allow to access the various contexts from a servlet
-application.
-</body>
-</html>
+
+/**
+ * Classes and interfaces that allow to access the various contexts from a servlet application.
+ */
+package org.apache.tiles.servlet.context;
