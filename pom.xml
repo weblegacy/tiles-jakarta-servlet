@@ -60,8 +60,8 @@
         <tiles2Version>2.2.2</tiles2Version>
 
         <!-- Configuration properties for the OSGi maven-bundle-plugin -->
-        <tiles.osgi.symbolicName>org.apache.${project.artifactId}</tiles.osgi.symbolicName>
-        <tiles.osgi.export>org.apache.tiles.*;version=${project.version}</tiles.osgi.export>
+        <tiles.osgi.symbolicName>io.github.weblegacy.${project.artifactId}</tiles.osgi.symbolicName>
+        <tiles.osgi.export>io.github.weblegacy.tiles2.*;version=${project.version}</tiles.osgi.export>
         <tiles.osgi.import>*</tiles.osgi.import>
         <tiles.osgi.dynamicImport />
         <tiles.osgi.private />
