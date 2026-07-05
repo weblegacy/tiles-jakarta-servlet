@@ -67,7 +67,7 @@ public class ServletContextAdapterTest {
         assertEquals("parameterValue2", context.getInitParameter("initParameter2"));
         assertEquals("newParameterValue2", context.getInitParameter("newInitParameter"));
 
-        Set<String> paramSet = new HashSet<String>();
+        Set<String> paramSet = new HashSet<>();
         paramSet.add("initParameter1");
         paramSet.add("initParameter2");
         paramSet.add("newInitParameter");

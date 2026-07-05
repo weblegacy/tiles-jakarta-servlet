@@ -84,9 +84,9 @@ public class WildcardServletTilesApplicationContext extends ServletTilesApplicat
         Set<URL> urlSet = null;
         Resource[] resources = resolver.getResources(path);
         if (resources != null && resources.length > 0) {
-            urlSet = new HashSet<URL>();
-            for (int i = 0; i < resources.length; i++) {
-                urlSet.add(resources[i].getURL());
+            urlSet = new HashSet<>();
+            for (Resource element : resources) {
+                urlSet.add(element.getURL());
             }
         }
         return urlSet;

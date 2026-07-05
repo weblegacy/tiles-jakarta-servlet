@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,20 +53,22 @@ final class ServletInitParamMap implements Map<String, String> {
     private ServletContext context = null;
 
     /** {@inheritDoc} */
+    @Override
     public void clear() {
         throw new UnsupportedOperationException();
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean containsKey(Object key) {
         return context.getInitParameter(key(key)) != null;
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean containsValue(Object value) {
-        Iterator<String> values = values().iterator();
-        while (values.hasNext()) {
-            if (value.equals(values.next())) {
+        for (String element : values()) {
+            if (value.equals(element)) {
                 return true;
             }
         }
@@ -75,21 +76,20 @@ final class ServletInitParamMap implements Map<String, String> {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
+    @Override
     public Set<Map.Entry<String, String>> entrySet() {
-        Set<Map.Entry<String, String>> set = new HashSet<Map.Entry<String, String>>();
+        Set<Map.Entry<String, String>> set = new HashSet<>();
         Enumeration<String> keys = context.getInitParameterNames();
         String key;
         while (keys.hasMoreElements()) {
             key = keys.nextElement();
-            set.add(new MapEntry<String, String>(key, context
-                    .getInitParameter(key), false));
+            set.add(new MapEntry<>(key, context.getInitParameter(key), false));
         }
         return set;
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
+    @Override
     public boolean equals(Object o) {
         ServletContext otherContext = ((ServletInitParamMap) o).context;
         boolean retValue = true;
@@ -107,24 +107,27 @@ final class ServletInitParamMap implements Map<String, String> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String get(Object key) {
         return context.getInitParameter(key(key));
     }
 
     /** {@inheritDoc} */
+    @Override
     public int hashCode() {
         return context.hashCode();
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isEmpty() {
         return size() < 1;
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
+    @Override
     public Set<String> keySet() {
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         Enumeration<String> keys = context.getInitParameterNames();
         while (keys.hasMoreElements()) {
             set.add(keys.nextElement());
@@ -133,22 +136,25 @@ final class ServletInitParamMap implements Map<String, String> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String put(String key, String value) {
         throw new UnsupportedOperationException();
     }
 
     /** {@inheritDoc} */
+    @Override
     public void putAll(Map<? extends String, ? extends String> map) {
         throw new UnsupportedOperationException();
     }
 
     /** {@inheritDoc} */
+    @Override
     public String remove(Object key) {
         throw new UnsupportedOperationException();
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
+    @Override
     public int size() {
         int n = 0;
         Enumeration<String> keys = context.getInitParameterNames();
@@ -160,9 +166,9 @@ final class ServletInitParamMap implements Map<String, String> {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
+    @Override
     public Collection<String> values() {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         Enumeration<String> keys = context.getInitParameterNames();
         while (keys.hasMoreElements()) {
             list.add(context.getInitParameter(keys.nextElement()));

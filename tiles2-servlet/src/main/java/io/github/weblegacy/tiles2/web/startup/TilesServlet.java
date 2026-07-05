@@ -46,6 +46,7 @@ public class TilesServlet extends AbstractTilesInitializerServlet {
      *
      * @since 2.1.2
      */
+    @Override
     @Deprecated
     protected TilesInitializer createTilesInitializer() {
         return new BasicTilesInitializer();

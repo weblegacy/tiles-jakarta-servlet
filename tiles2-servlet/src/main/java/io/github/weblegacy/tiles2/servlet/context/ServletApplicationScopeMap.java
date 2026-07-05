@@ -54,6 +54,7 @@ final class ServletApplicationScopeMap implements Map<String, Object> {
     private ServletContext context = null;
 
     /** {@inheritDoc} */
+    @Override
     public void clear() {
         Iterator<String> keys = keySet().iterator();
         while (keys.hasNext()) {
@@ -62,12 +63,13 @@ final class ServletApplicationScopeMap implements Map<String, Object> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean containsKey(Object key) {
         return context.getAttribute(key(key)) != null;
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
+    @Override
     public boolean containsValue(Object value) {
         if (value == null) {
             return false;
@@ -83,21 +85,20 @@ final class ServletApplicationScopeMap implements Map<String, Object> {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
+    @Override
     public Set<Map.Entry<String, Object>> entrySet() {
-        Set<Map.Entry<String, Object>> set = new HashSet<Map.Entry<String, Object>>();
+        Set<Map.Entry<String, Object>> set = new HashSet<>();
         Enumeration<String> keys = context.getAttributeNames();
         String key;
         while (keys.hasMoreElements()) {
             key = keys.nextElement();
-            set.add(new MapEntry<String, Object>(key,
-                    context.getAttribute(key), true));
+            set.add(new MapEntry<>(key, context.getAttribute(key), true));
         }
         return set;
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
+    @Override
     public boolean equals(Object o) {
         ServletContext otherContext = ((ServletApplicationScopeMap) o).context;
         boolean retValue = true;
@@ -115,24 +116,27 @@ final class ServletApplicationScopeMap implements Map<String, Object> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object get(Object key) {
         return context.getAttribute(key(key));
     }
 
     /** {@inheritDoc} */
+    @Override
     public int hashCode() {
         return context.hashCode();
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isEmpty() {
         return size() < 1;
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
+    @Override
     public Set<String> keySet() {
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         Enumeration<String> keys = context.getAttributeNames();
         while (keys.hasMoreElements()) {
             set.add(keys.nextElement());
@@ -141,6 +145,7 @@ final class ServletApplicationScopeMap implements Map<String, Object> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object put(String key, Object value) {
         if (value == null) {
             return remove(key);
@@ -152,15 +157,15 @@ final class ServletApplicationScopeMap implements Map<String, Object> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void putAll(Map<? extends String, ? extends Object> map) {
-        Iterator<? extends String> keys = map.keySet().iterator();
-        while (keys.hasNext()) {
-            String key = keys.next();
+        for (String key : map.keySet()) {
             context.setAttribute(key, map.get(key));
         }
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object remove(Object key) {
         String skey = key(key);
         Object previous = context.getAttribute(skey);
@@ -169,7 +174,7 @@ final class ServletApplicationScopeMap implements Map<String, Object> {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
+    @Override
     public int size() {
         int n = 0;
         Enumeration<String> keys = context.getAttributeNames();
@@ -181,9 +186,9 @@ final class ServletApplicationScopeMap implements Map<String, Object> {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
+    @Override
     public Collection<Object> values() {
-        List<Object> list = new ArrayList<Object>();
+        List<Object> list = new ArrayList<>();
         Enumeration<String> keys = context.getAttributeNames();
         while (keys.hasMoreElements()) {
             list.add(context.getAttribute(keys.nextElement()));

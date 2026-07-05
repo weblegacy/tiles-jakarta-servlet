@@ -43,12 +43,14 @@ public class WildcardServletTilesApplicationContextFactory extends
         AbstractTilesApplicationContextFactory implements Initializable {
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public void init(Map<String, String> params) {
         // Does nothing.
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public TilesApplicationContext createApplicationContext(Object context) {
         if (context instanceof ServletContext) {

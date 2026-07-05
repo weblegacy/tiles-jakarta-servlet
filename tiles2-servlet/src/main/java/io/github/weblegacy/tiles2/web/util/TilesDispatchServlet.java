@@ -65,6 +65,7 @@ public class TilesDispatchServlet extends HttpServlet {
     private AttributeContextMutator mutator;
 
     /** {@inheritDoc} */
+    @Override
     public void init() throws ServletException {
         super.init();
 
@@ -84,6 +85,7 @@ public class TilesDispatchServlet extends HttpServlet {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
         throws ServletException, IOException {
 
@@ -117,6 +119,7 @@ public class TilesDispatchServlet extends HttpServlet {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res)
         throws ServletException, IOException {
         log.info("Tiles dispatch request received. Redirecting POST to GET.");
@@ -129,6 +132,7 @@ public class TilesDispatchServlet extends HttpServlet {
     class DefaultMutator implements AttributeContextMutator {
 
         /** {@inheritDoc} */
+        @Override
         public void mutate(AttributeContext context, ServletRequest request) {
             // noop;
         }

@@ -497,6 +497,7 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
      *
      * @since Servlet 3.1
      */
+    @Override
     public String changeSessionId() {
         throw new UnsupportedOperationException();
     }
@@ -587,6 +588,7 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
      *
      * @since Servlet 3.0
      */
+    @Override
     public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
         throw new UnsupportedOperationException();
     }
@@ -616,6 +618,7 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
      *
      * @since Servlet 3.0
      */
+    @Override
     public void login(String username, String password) throws ServletException {
         throw new UnsupportedOperationException();
     }
@@ -628,6 +631,7 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
      *
      * @since Servlet 3.0
      */
+    @Override
     public void logout() throws ServletException {
         throw new UnsupportedOperationException();
     }
@@ -657,6 +661,7 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
      *
      * @since Servlet 3.0
      */
+    @Override
     public Collection<Part> getParts() throws IOException, ServletException {
         throw new UnsupportedOperationException();
     }
@@ -682,6 +687,7 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
      *
      * @since Servlet 3.0
      */
+    @Override
     public Part getPart(String name) throws IOException, ServletException {
         throw new UnsupportedOperationException();
     }
@@ -704,6 +710,7 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
      *
      * @since Servlet 3.1
      */
+    @Override
     public <T extends HttpUpgradeHandler> T  upgrade(Class<T> handlerClass)
             throws IOException, ServletException {
 

@@ -45,11 +45,13 @@ public class ServletTilesApplicationContextFactory extends
         AbstractTilesApplicationContextFactory implements Initializable {
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public void init(Map<String, String> configParameters) {
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public TilesApplicationContext createApplicationContext(Object context) {
         if (context instanceof ServletContext) {

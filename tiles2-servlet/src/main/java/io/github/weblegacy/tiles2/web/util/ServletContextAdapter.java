@@ -67,13 +67,11 @@ public class ServletContextAdapter implements ServletContext {
      */
     public ServletContextAdapter(ServletConfig config) {
         this.rootContext = config.getServletContext();
-        initParameters = new Hashtable<String, String>();
-        Enumeration<String> enumeration = rootContext
-                .getInitParameterNames();
+        initParameters = new Hashtable<>();
+        Enumeration<String> enumeration = rootContext.getInitParameterNames();
         while (enumeration.hasMoreElements()) {
             String paramName = enumeration.nextElement();
-            initParameters.put(paramName, rootContext
-                    .getInitParameter(paramName));
+            initParameters.put(paramName, rootContext.getInitParameter(paramName));
         }
         enumeration = config.getInitParameterNames();
         while (enumeration.hasMoreElements()) {
@@ -83,129 +81,154 @@ public class ServletContextAdapter implements ServletContext {
     }
 
     /** {@inheritDoc} */
+    @Override
     public ServletContext getContext(String string) {
         return rootContext.getContext(string);
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getMajorVersion() {
         return rootContext.getMajorVersion();
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getMinorVersion() {
         return rootContext.getMinorVersion();
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getMimeType(String string) {
         return rootContext.getMimeType(string);
     }
 
     /** {@inheritDoc} */
+    @Override
     public Set<String> getResourcePaths(String string) {
         return rootContext.getResourcePaths(string);
     }
 
     /** {@inheritDoc} */
+    @Override
     public URL getResource(String string) throws MalformedURLException {
         return rootContext.getResource(string);
     }
 
     /** {@inheritDoc} */
+    @Override
     public InputStream getResourceAsStream(String string) {
         return rootContext.getResourceAsStream(string);
     }
 
     /** {@inheritDoc} */
+    @Override
     public RequestDispatcher getRequestDispatcher(String string) {
         return rootContext.getRequestDispatcher(string);
     }
 
     /** {@inheritDoc} */
+    @Override
     public RequestDispatcher getNamedDispatcher(String string) {
         return rootContext.getNamedDispatcher(string);
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public Servlet getServlet(String string) throws ServletException {
         return rootContext.getServlet(string);
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public Enumeration<Servlet> getServlets() {
         return rootContext.getServlets();
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public Enumeration<String> getServletNames() {
         return rootContext.getServletNames();
     }
 
     /** {@inheritDoc} */
+    @Override
     public void log(String string) {
         rootContext.log(string);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void log(Exception exception, String string) {
         rootContext.log(exception, string);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void log(String string, Throwable throwable) {
         rootContext.log(string, throwable);
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getRealPath(String string) {
         return rootContext.getRealPath(string);
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getServerInfo() {
         return rootContext.getServerInfo();
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getInitParameter(String string) {
         return initParameters.get(string);
     }
 
     /** {@inheritDoc} */
+    @Override
     public Enumeration<String> getInitParameterNames() {
         return initParameters.keys();
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object getAttribute(String string) {
         return rootContext.getAttribute(string);
     }
 
     /** {@inheritDoc} */
+    @Override
     public Enumeration<String> getAttributeNames() {
         return rootContext.getAttributeNames();
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setAttribute(String string, Object object) {
         rootContext.setAttribute(string, object);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void removeAttribute(String string) {
         rootContext.removeAttribute(string);
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getServletContextName() {
         return rootContext.getServletContextName();
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getContextPath() {
         return rootContext.getContextPath();
     }
@@ -449,11 +472,13 @@ public class ServletContextAdapter implements ServletContext {
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean hasMoreElements() {
             return first.hasMoreElements() || second.hasMoreElements();
         }
 
         /** {@inheritDoc} */
+        @Override
         public T nextElement() {
             if (first.hasMoreElements()) {
                 return first.nextElement();

@@ -64,11 +64,13 @@ public class ServletTilesApplicationContext implements TilesApplicationContext {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object getContext() {
         return servletContext;
     }
 
     /** {@inheritDoc} */
+    @Override
     public Map<String, Object> getApplicationScope() {
 
         if ((applicationScope == null) && (servletContext != null)) {
@@ -79,6 +81,7 @@ public class ServletTilesApplicationContext implements TilesApplicationContext {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Map<String, String> getInitParams() {
 
         if ((initParam == null) && (servletContext != null)) {
@@ -89,13 +92,15 @@ public class ServletTilesApplicationContext implements TilesApplicationContext {
     }
 
     /** {@inheritDoc} */
+    @Override
     public URL getResource(String path) throws IOException {
         return servletContext.getResource(path);
     }
 
     /** {@inheritDoc} */
+    @Override
     public Set<URL> getResources(String path) throws IOException {
-        HashSet<URL> urls = new HashSet<URL>();
+        HashSet<URL> urls = new HashSet<>();
         urls.add(getResource(path));
         return urls;
     }

@@ -196,6 +196,7 @@ public class MockServletContext implements ServletContext {
      *
      * @since Servlet 3.0
      */
+    @Override
     public int getEffectiveMajorVersion() {
         throw new UnsupportedOperationException();
     }
@@ -220,6 +221,7 @@ public class MockServletContext implements ServletContext {
      *
      * @since Servlet 3.0
      */
+    @Override
     public int getEffectiveMinorVersion() {
         throw new UnsupportedOperationException();
     }
@@ -609,6 +611,7 @@ public class MockServletContext implements ServletContext {
      *
      * @since Servlet 3.0
      */
+    @Override
     public boolean setInitParameter(String name, String value) {
         if (initParameters.containsKey(name)) {
             return false;
@@ -873,6 +876,7 @@ public class MockServletContext implements ServletContext {
      *
      * @since Servlet 4.0
      */
+    @Override
     public ServletRegistration.Dynamic addJspFile(String servletName, String jspFile) {
         throw new UnsupportedOperationException();
     }

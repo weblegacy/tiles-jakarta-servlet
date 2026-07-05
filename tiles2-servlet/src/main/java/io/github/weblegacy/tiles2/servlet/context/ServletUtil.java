@@ -270,7 +270,7 @@ public final class ServletUtil {
         ArrayStack<Object> composeStack = (ArrayStack<Object>) request.getAttribute(
                 COMPOSE_STACK_ATTRIBUTE_NAME);
         if (composeStack == null) {
-            composeStack = new ArrayStack<Object>();
+            composeStack = new ArrayStack<>();
             request.setAttribute(COMPOSE_STACK_ATTRIBUTE_NAME, composeStack);
         }
         return composeStack;

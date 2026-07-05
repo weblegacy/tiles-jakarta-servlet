@@ -64,6 +64,7 @@ public class ServletTilesContextFactory implements TilesContextFactory {
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public void init(Map<String, String> configParameters) {
         if (contextFactory instanceof Initializable) {
@@ -73,12 +74,14 @@ public class ServletTilesContextFactory implements TilesContextFactory {
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public TilesApplicationContext createApplicationContext(Object context) {
         return contextFactory.createApplicationContext(context);
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public TilesRequestContext createRequestContext(TilesApplicationContext context,
                                                     Object... requestItems) {

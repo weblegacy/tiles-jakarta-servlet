@@ -95,7 +95,7 @@ public class WildcardServletTilesApplicationContextTest {
     @Test
     public void testGetResources() throws IOException {
         String url = "test.properties";
-        HashSet<URL> set = new HashSet<URL>();
+        HashSet<URL> set = new HashSet<>();
         URL u = new URL("file://tiles/test.properties");
         set.add(u);
         EasyMock.expect(servletContext.getResource("/" + url)).andReturn(u)
@@ -106,7 +106,7 @@ public class WildcardServletTilesApplicationContextTest {
         URL pomUrl = new URL("file://tiles/pom.xml");
         EasyMock.expect(servletContext.getResource("/WEB-INF/pom.xml"))
                 .andReturn(pomUrl);
-        Set<String> elementSet = new HashSet<String>();
+        Set<String> elementSet = new HashSet<>();
         elementSet.add("/WEB-INF/pom.xml");
         EasyMock.expect(servletContext.getResourcePaths("/WEB-INF/")).andReturn(elementSet);
         EasyMock.replay(servletContext);
@@ -137,7 +137,7 @@ public class WildcardServletTilesApplicationContextTest {
          * @throws MalformedURLException If the URL is not valid (that should not happen).
          */
         public MockClassLoader() throws MalformedURLException {
-            testPropertiesResources = new Vector<URL>();
+            testPropertiesResources = new Vector<>();
             testPropertiesResources.add(new URL("file://tiles/test/test.properties"));
             testPropertiesResources.add(new URL("file://tiles/two/test.properties"));
             testPropertiesResources.add(new URL("file://tiles/three/test.properties"));

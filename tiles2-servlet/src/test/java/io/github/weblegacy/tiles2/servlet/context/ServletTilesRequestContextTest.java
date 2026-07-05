@@ -78,12 +78,12 @@ public class ServletTilesRequestContextTest {
     public void setUp() throws Exception {
         servletContext = new MockServletContext();
         applicationContext = EasyMock.createMock(TilesApplicationContext.class);
-        Map<String, Object> applicationScope = new HashMap<String, Object>();
+        Map<String, Object> applicationScope = new HashMap<>();
         applicationScope.put("applicationAttribute1", "applicationValue1");
         applicationScope.put("applicationAttribute2", "applicationValue2");
         EasyMock.expect(applicationContext.getApplicationScope()).andReturn(
                 applicationScope);
-        Map<String, String> initParams = new HashMap<String, String>();
+        Map<String, String> initParams = new HashMap<>();
         initParams.put("initParameter1", "initParameterValue1");
         EasyMock.expect(applicationContext.getInitParams()).andReturn(
                 initParams);

@@ -392,6 +392,7 @@ public class MockHttpServletResponse extends MockServletResponse implements Http
      *
      * @since Servlet 3.0
      */
+    @Override
     public int getStatus() {
         throw new UnsupportedOperationException();
     }
@@ -414,6 +415,7 @@ public class MockHttpServletResponse extends MockServletResponse implements Http
      *
      * @since Servlet 3.0
      */
+    @Override
     public String getHeader(String name) {
         throw new UnsupportedOperationException();
     }
@@ -436,6 +438,7 @@ public class MockHttpServletResponse extends MockServletResponse implements Http
      *
      * @since Servlet 3.0
      */
+    @Override
     public Collection<String> getHeaders(String name) {
         throw new UnsupportedOperationException();
     }
@@ -455,6 +458,7 @@ public class MockHttpServletResponse extends MockServletResponse implements Http
      *
      * @since Servlet 3.0
      */
+    @Override
     public Collection<String> getHeaderNames() {
         throw new UnsupportedOperationException();
     }

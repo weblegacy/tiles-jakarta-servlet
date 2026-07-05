@@ -39,10 +39,12 @@ import org.apache.tiles.context.TilesRequestContextFactory;
 public class ServletTilesRequestContextFactory implements TilesRequestContextFactory {
 
     /** {@inheritDoc} */
+    @Override
     public void init(Map<String, String> configParameters) {
     }
 
     /** {@inheritDoc} */
+    @Override
     public TilesRequestContext createRequestContext(TilesApplicationContext context,
                                                     Object... requestItems) {
         if (requestItems.length == 2

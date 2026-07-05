@@ -65,6 +65,7 @@ public class TilesFilter extends TilesServlet implements Filter {
      * @throws IOException      if an input/output error occurs
      * @throws ServletException if a servlet error occurs
      */
+    @Override
     @Deprecated
     public void doFilter(ServletRequest request, ServletResponse response,
                          FilterChain chain)
@@ -102,12 +103,14 @@ public class TilesFilter extends TilesServlet implements Filter {
     /**
      * Destroy method for this filter.
      */
+    @Override
     @Deprecated
     public void destroy() {
         super.destroy();
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public void init(FilterConfig filterConfig) throws ServletException {
         this.filterConfig = filterConfig;
@@ -119,6 +122,7 @@ public class TilesFilter extends TilesServlet implements Filter {
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public void log(String msg) {
         filterConfig.getServletContext().log(msg);
@@ -161,24 +165,28 @@ public class TilesFilter extends TilesServlet implements Filter {
         }
 
         /** {@inheritDoc} */
+        @Override
         @Deprecated
         public String getServletName() {
             return config.getFilterName();
         }
 
         /** {@inheritDoc} */
+        @Override
         @Deprecated
         public ServletContext getServletContext() {
             return config.getServletContext();
         }
 
         /** {@inheritDoc} */
+        @Override
         @Deprecated
         public String getInitParameter(String string) {
             return config.getInitParameter(string);
         }
 
         /** {@inheritDoc} */
+        @Override
         @Deprecated
         public Enumeration<String> getInitParameterNames() {
             return config.getInitParameterNames();

@@ -55,6 +55,7 @@ public abstract class AbstractTilesListener implements ServletContextListener {
      *
      * @param event The intercepted event.
      */
+    @Override
     public void contextInitialized(ServletContextEvent event) {
         ServletContext servletContext = event.getServletContext();
         initializer = createTilesInitializer();
@@ -67,6 +68,7 @@ public abstract class AbstractTilesListener implements ServletContextListener {
      *
      * @param event The intercepted event.
      */
+    @Override
     public void contextDestroyed(ServletContextEvent event) {
         ServletContext servletContext = event.getServletContext();
         try {

@@ -183,6 +183,7 @@ public class MockServletRequest implements ServletRequest {
      *
      * @since Servlet 3.1
      */
+    @Override
     public long getContentLengthLong() {
         throw new UnsupportedOperationException();
     }
@@ -576,6 +577,7 @@ public class MockServletRequest implements ServletRequest {
      *
      * @since Servlet 3.0
      */
+    @Override
     public ServletContext getServletContext() {
         throw new UnsupportedOperationException();
     }
@@ -618,6 +620,7 @@ public class MockServletRequest implements ServletRequest {
      *
      * @since Servlet 3.0
      */
+    @Override
     public AsyncContext startAsync() throws IllegalStateException {
         throw new UnsupportedOperationException();
     }
@@ -675,6 +678,7 @@ public class MockServletRequest implements ServletRequest {
      *
      * @since Servlet 3.0
      */
+    @Override
     public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse)
             throws IllegalStateException {
 
@@ -696,6 +700,7 @@ public class MockServletRequest implements ServletRequest {
      *
      * @since Servlet 3.0
      */
+    @Override
     public boolean isAsyncStarted() {
         throw new UnsupportedOperationException();
     }
@@ -711,6 +716,7 @@ public class MockServletRequest implements ServletRequest {
      *
      * @since Servlet 3.0
      */
+    @Override
     public boolean isAsyncSupported() {
         throw new UnsupportedOperationException();
     }
@@ -730,6 +736,7 @@ public class MockServletRequest implements ServletRequest {
      *
      * @since Servlet 3.0
      */
+    @Override
     public AsyncContext getAsyncContext() {
         throw new UnsupportedOperationException();
     }
@@ -761,6 +768,7 @@ public class MockServletRequest implements ServletRequest {
      *
      * @since Servlet 3.0
      */
+    @Override
     public DispatcherType getDispatcherType() {
         throw new UnsupportedOperationException();
     }

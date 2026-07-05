@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,24 +53,25 @@ final class ServletParamValuesMap implements Map<String, String[]> {
     private ServletRequest request = null;
 
     /** {@inheritDoc} */
+    @Override
     public void clear() {
         throw new UnsupportedOperationException();
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean containsKey(Object key) {
         return request.getParameter(key(key)) != null;
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean containsValue(Object value) {
         if (!(value instanceof String[])) {
             return false;
         }
         String[] test = (String[]) value;
-        Iterator<String[]> values = values().iterator();
-        while (values.hasNext()) {
-            String[] actual = values.next();
+        for (String[] actual : values()) {
             if (test.length == actual.length) {
                 boolean matched = true;
                 for (int i = 0; i < test.length; i++) {
@@ -89,21 +89,20 @@ final class ServletParamValuesMap implements Map<String, String[]> {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
+    @Override
     public Set<Map.Entry<String, String[]>> entrySet() {
-        Set<Map.Entry<String, String[]>> set = new HashSet<Map.Entry<String, String[]>>();
+        Set<Map.Entry<String, String[]>> set = new HashSet<>();
         Enumeration<String> keys = request.getParameterNames();
         String key;
         while (keys.hasMoreElements()) {
             key = keys.nextElement();
-            set.add(new MapEntry<String, String[]>(key, request
-                    .getParameterValues(key), false));
+            set.add(new MapEntry<>(key, request.getParameterValues(key), false));
         }
         return set;
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
+    @Override
     public boolean equals(Object o) {
         ServletRequest otherRequest = ((ServletParamValuesMap) o).request;
         boolean retValue = true;
@@ -121,24 +120,27 @@ final class ServletParamValuesMap implements Map<String, String[]> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String[] get(Object key) {
         return request.getParameterValues(key(key));
     }
 
     /** {@inheritDoc} */
+    @Override
     public int hashCode() {
         return request.hashCode();
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isEmpty() {
         return size() < 1;
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
+    @Override
     public Set<String> keySet() {
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         Enumeration<String> keys = request.getParameterNames();
         while (keys.hasMoreElements()) {
             set.add(keys.nextElement());
@@ -147,22 +149,25 @@ final class ServletParamValuesMap implements Map<String, String[]> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String[] put(String key, String[] value) {
         throw new UnsupportedOperationException();
     }
 
     /** {@inheritDoc} */
+    @Override
     public void putAll(Map<? extends String, ? extends String[]> map) {
         throw new UnsupportedOperationException();
     }
 
     /** {@inheritDoc} */
+    @Override
     public String[] remove(Object key) {
         throw new UnsupportedOperationException();
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
+    @Override
     public int size() {
         int n = 0;
         Enumeration<String> keys = request.getParameterNames();
@@ -174,9 +179,9 @@ final class ServletParamValuesMap implements Map<String, String[]> {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
+    @Override
     public Collection<String[]> values() {
-        List<String[]> list = new ArrayList<String[]>();
+        List<String[]> list = new ArrayList<>();
         Enumeration<String> keys = request.getParameterNames();
         while (keys.hasMoreElements()) {
             list.add(request.getParameterValues(keys.nextElement()));

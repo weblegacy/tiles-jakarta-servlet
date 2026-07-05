@@ -47,6 +47,7 @@ public class TilesListener extends AbstractTilesListener {
      *
      * @since 2.1.2
      */
+    @Override
     @Deprecated
     protected TilesInitializer createTilesInitializer() {
         return new BasicTilesInitializer();
