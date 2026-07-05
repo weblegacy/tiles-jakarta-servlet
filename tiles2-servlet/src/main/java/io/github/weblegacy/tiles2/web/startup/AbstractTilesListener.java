@@ -23,9 +23,9 @@ package io.github.weblegacy.tiles2.web.startup;
 
 import io.github.weblegacy.tiles2.servlet.context.ServletTilesApplicationContext;
 import io.github.weblegacy.tiles2.servlet.context.ServletUtil;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 import org.apache.tiles.TilesException;
 import org.apache.tiles.startup.TilesInitializer;
 import org.slf4j.Logger;

@@ -22,7 +22,7 @@
 package io.github.weblegacy.tiles2.web.startup;
 
 import io.github.weblegacy.tiles2.servlet.context.ServletTilesApplicationContext;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 import org.apache.tiles.TilesApplicationContext;
 import org.apache.tiles.TilesContainer;
 import org.apache.tiles.factory.AbstractTilesContainerFactory;

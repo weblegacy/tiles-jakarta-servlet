@@ -21,8 +21,8 @@
 
 package io.github.weblegacy.tiles2.servlet.context;
 
+import jakarta.servlet.ServletContext;
 import java.util.Map;
-import javax.servlet.ServletContext;
 import org.apache.tiles.Initializable;
 import org.apache.tiles.TilesApplicationContext;
 import org.apache.tiles.context.AbstractTilesApplicationContextFactory;

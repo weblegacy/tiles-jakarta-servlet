@@ -21,11 +21,11 @@
 
 package io.github.weblegacy.tiles2.servlet.mock;
 
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 
 /**
  * The mock-class for {@link ServletConfig}.

@@ -21,10 +21,10 @@
 
 package io.github.weblegacy.tiles2.servlet.context;
 
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import java.io.IOException;
 import java.io.PrintWriter;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 
 /**
  * Wraps an HTTP response and overrides its print writer.

@@ -21,7 +21,7 @@
 
 package io.github.weblegacy.tiles2.servlet.context.wildcard;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 /**
  * Servlet-based implementation of the TilesApplicationContext interface that can resolve resources

@@ -21,12 +21,13 @@
 
 package io.github.weblegacy.tiles2.servlet.mock;
 
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.ServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletResponse;
 
 /**
  * The mock-class for {@link ServletResponse}.
@@ -36,20 +37,26 @@ import javax.servlet.ServletResponse;
  * {@code service} method.</p>
  *
  * <p>To send binary data in a MIME body response, use the {@link ServletOutputStream} returned by
- * {@link #getOutputStream}. To send character data, use the {@code PrintWriter} object returned by
- * {@link #getWriter}. To mix binary and text data, for example, to create a multipart response, use
- * a {@code ServletOutputStream} and manage the character sections manually.</p>
+ * {@link #getOutputStream()}. To send character data, use the {@code PrintWriter} object returned
+ * by {@link #getWriter()}. To mix binary and text data, for example, to create a multipart
+ * response, use a {@code ServletOutputStream} and manage the character sections manually.</p>
  *
- * <p>The charset for the MIME body response can be specified explicitly using the
- * {@link #setCharacterEncoding} and {@link #setContentType} methods, or implicitly using the
- * {@link #setLocale} method. Explicit specifications take precedence over implicit specifications.
- * If no charset is specified, ISO-8859-1 will be used. The {@code setCharacterEncoding},
- * {@code setContentType}, or {@code setLocale} method must be called before {@code getWriter} and
- * before committing the response for the character encoding to be used.</p>
+ * <p>The charset for the MIME body response can be specified explicitly using any of the following
+ * techniques: per request, per web-app (using
+ * {@link ServletContext#setRequestCharacterEncoding(String)}, deployment descriptor), and per
+ * container (for all web applications deployed in that container, using vendor specific
+ * configuration). If multiple of the preceding techniques have been employed, the priority is the
+ * order listed. For per request, the charset for the response can be specified explicitly using the
+ * {@link #setCharacterEncoding(String)} and {@link #setContentType(String)} methods, or implicitly
+ * using the {@link #setLocale(Locale)} method. Explicit specifications take precedence over
+ * implicit specifications. If no charset is explicitly specified, {@code ISO-8859-1} will be used.
+ * The {@code setCharacterEncoding}, {@code setContentType}, or {@code setLocale} method must be
+ * called before {@code getWriter} and before committing the response for the character encoding to
+ * be used.</p>
  *
- * <p>See the Internet RFCs such as <a href="https://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a> for
- * more information on MIME. Protocols such as SMTP and HTTP define profiles of MIME, and those
- * standards are still evolving.</p>
+ * <p>See the Internet RFCs such as <a href="https://datatracker.ietf.org/doc/html/rfc2045">RFC
+ * 2045</a> for more information on MIME. Protocols such as SMTP and HTTP define profiles of MIME,
+ * and those standards are still evolving.</p>
  *
  * @author Various
  *
@@ -65,12 +72,17 @@ public class MockServletResponse implements ServletResponse {
 
     /**
      * Returns the name of the character encoding (MIME charset) used for the body sent in this
-     * response. The character encoding may have been specified explicitly using the
-     * {@link #setCharacterEncoding} or {@link #setContentType} methods, or implicitly using the
-     * {@link #setLocale} method. Explicit specifications take precedence over implicit
-     * specifications. Calls made to these methods after {@code getWriter} has been called or after
-     * the response has been committed have no effect on the character encoding. If no character
-     * encoding has been specified, {@code ISO-8859-1} is returned.
+     * response. The following methods for specifying the response character encoding are consulted,
+     * in decreasing order of priority: per request, perweb-app (using
+     * {@link ServletContext#setResponseCharacterEncoding(String)}, deployment descriptor), and per
+     * container (for all web applications deployed in that container, using vendor specific
+     * configuration). The first one of these methods that yields a result is returned. Per-request,
+     * the charset for the response can be specified explicitly using the
+     * {@link #setCharacterEncoding(String)} and {@link #setContentType(String)} methods, or
+     * implicitly using the {@link #setLocale(Locale)} method. Explicit specifications take
+     * precedence over implicit specifications. Calls made to these methods after {@code getWriter}
+     * has been called or after the response has been committed have no effect on the character
+     * encoding. If no character encoding has been specified, {@code ISO-8859-1} is returned.
      *
      * <p>See <a href="https://datatracker.ietf.org/doc/html/rfc2047">RFC 2047</a> for more
      * information about character encoding and MIME.</p>
@@ -85,15 +97,15 @@ public class MockServletResponse implements ServletResponse {
 
     /**
      * Returns the content type used for the MIME body sent in this response. The content type
-     * proper must have been specified using {@link #setContentType} before the response is
+     * proper must have been specified using {@link #setContentType(String)} before the response is
      * committed. If no content type has been specified, this method returns null. If a content
      * type has been specified, and a character encoding has been explicitly or implicitly
-     * specified as described in {@link #getCharacterEncoding} or {@link #getWriter} has been
+     * specified as described in {@link #getCharacterEncoding()} or {@link #getWriter()} has been
      * called, the charset parameter is included in the string returned. If no character encoding
      * has been specified, the charset parameter is omitted.
      *
      * @return a {@code String} specifying the content type, for example,
-     *         {@code text/html; charset=UTF-8}, or null
+     *         {@code text/html; charset=UTF-8}, or {@code null}
      *
      * @since Servlet 2.4
      */
@@ -108,7 +120,8 @@ public class MockServletResponse implements ServletResponse {
      *
      * <p>Calling {@code flush()} on the {@link ServletOutputStream} commits the response.</p>
      *
-     * <p>Either this method or {@link #getWriter} may be called to write the body, not both.</p>
+     * <p>Either this method or {@link #getWriter()} may be called to write the body, not both,
+     * except when {@link #reset()} has been called.</p>
      *
      * @return a {@link ServletOutputStream} for writing binary data
      *
@@ -116,7 +129,8 @@ public class MockServletResponse implements ServletResponse {
      *                               response
      * @throws IOException           if an input or output exception occurred
      *
-     * @see #getWriter
+     * @see #getWriter()
+     * @see #reset()
      */
     @Override
     public ServletOutputStream getOutputStream() throws IOException {
@@ -125,15 +139,15 @@ public class MockServletResponse implements ServletResponse {
 
     /**
      * Returns a {@code PrintWriter} object that can send character text to the client. The
-     * {@code PrintWriter} uses the character encoding returned by {@link #getCharacterEncoding}.
+     * {@code PrintWriter} uses the character encoding returned by {@link #getCharacterEncoding()}.
      * If the response's character encoding has not been specified as described in
      * {@code getCharacterEncoding} (i.e., the method just returns the default value
      * {@code ISO-8859-1}), {@code getWriter} updates it to {@code ISO-8859-1}.
      *
      * <p>Calling {@code flush()} on the {@link PrintWriter} commits the response.</p>
      *
-     * <p>Either this method or {@link #getOutputStream} may be called to write the body, not
-     * both.</p>
+     * <p>Either this method or {@link #getOutputStream()} may be called to write the body, not
+     * both, except when {@link #reset()} has been called.</p>
      *
      * @return a {@code PrintWriter} object that can return character data to the client
      *
@@ -143,8 +157,9 @@ public class MockServletResponse implements ServletResponse {
      *                                      called for this response object
      * @throws IOException                  if an input or output exception occurred
      *
-     * @see #getOutputStream
-     * @see #setCharacterEncoding
+     * @see #getOutputStream()
+     * @see #setCharacterEncoding(String)
+     * @see #reset()
      */
     @Override
     public PrintWriter getWriter() throws IOException {
@@ -153,8 +168,10 @@ public class MockServletResponse implements ServletResponse {
 
     /**
      * Sets the character encoding (MIME charset) of the response being sent to the client, for
-     * example, to UTF-8. If the character encoding has already been set by {@link #setContentType}
-     * or {@link #setLocale}, this method overrides it. Calling {@link #setContentType} with the
+     * example, to UTF-8. If the response character encoding has already been set by the
+     * {@link ServletContext#setResponseCharacterEncoding(String)}, deployment descriptor, or using
+     * the {@link #setContentType(String)} or {@link #setLocale(Locale)} methods, the value set in
+     * this method overrides any of those values. Calling {@link #setContentType(String)} with the
      * {@code String} of {@code text/html} and calling this method with the {@code String} of
      * {@code UTF-8} is equivalent with calling {@code setContentType} with the {@code String} of
      * {@code text/html; charset=UTF-8}.
@@ -175,7 +192,8 @@ public class MockServletResponse implements ServletResponse {
      *                href="https://www.iana.org/assignments/character-sets/character-sets.xhtml">
      *                Character Sets</a>
      *
-     * @see #setContentType #setLocale
+     * @see #setContentType(String)
+     * @see #setLocale(Locale)
      *
      * @since Servlet 2.4
      */
@@ -197,6 +215,19 @@ public class MockServletResponse implements ServletResponse {
     }
 
     /**
+     * Sets the length of the content body in the response in HTTP servlets, this method sets the
+     * HTTP Content-Length header.
+     *
+     * @param len a long specifying the length of the content being returned to the client; sets the
+     *            Content-Length header
+     *
+     * @since Servlet 3.1
+     */
+    public void setContentLengthLong(long len) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Sets the content type of the response being sent to the client, if the response has not been
      * committed yet. The given content type may include a character encoding specification, for
      * example, {@code text/html;charset=UTF-8}. The response's character encoding is only set from
@@ -213,10 +244,10 @@ public class MockServletResponse implements ServletResponse {
      *
      * @param type a {@code String} specifying the MIME type of the content
      *
-     * @see #setLocale
-     * @see #setCharacterEncoding
-     * @see #getOutputStream
-     * @see #getWriter
+     * @see #setLocale(Locale)
+     * @see #setCharacterEncoding(String)
+     * @see #getOutputStream()
+     * @see #getWriter()
      */
     @Override
     public void setContentType(String type) {
@@ -241,10 +272,10 @@ public class MockServletResponse implements ServletResponse {
      *
      * @throws IllegalStateException if this method is called after content has been written
      *
-     * @see #getBufferSize
-     * @see #flushBuffer
-     * @see #isCommitted
-     * @see #reset
+     * @see #getBufferSize()
+     * @see #flushBuffer()
+     * @see #isCommitted()
+     * @see #reset()
      */
     @Override
     public void setBufferSize(int size) {
@@ -257,10 +288,10 @@ public class MockServletResponse implements ServletResponse {
      *
      * @return the actual buffer size used
      *
-     * @see #setBufferSize
-     * @see #flushBuffer
-     * @see #isCommitted
-     * @see #reset
+     * @see #setBufferSize(int)
+     * @see #flushBuffer()
+     * @see #isCommitted()
+     * @see #reset()
      */
     @Override
     public int getBufferSize() {
@@ -271,10 +302,12 @@ public class MockServletResponse implements ServletResponse {
      * Forces any content in the buffer to be written to the client. A call to this method
      * automatically commits the response, meaning the status code and headers will be written.
      *
-     * @see #setBufferSize
-     * @see #getBufferSize
-     * @see #isCommitted
-     * @see #reset
+     * @throws IOException if the act of flushing the buffer cannot be completed.
+     *
+     * @see #setBufferSize(int)
+     * @see #getBufferSize()
+     * @see #isCommitted()
+     * @see #reset()
      */
     @Override
     public void flushBuffer() throws IOException {
@@ -286,10 +319,10 @@ public class MockServletResponse implements ServletResponse {
      * status code. If the response has been committed, this method throws an
      * {@link IllegalStateException}.
      *
-     * @see #setBufferSize
-     * @see #getBufferSize
-     * @see #isCommitted
-     * @see #reset
+     * @see #setBufferSize(int)
+     * @see #getBufferSize()
+     * @see #isCommitted()
+     * @see #reset()
      *
      * @since Servlet 2.3
      */
@@ -304,10 +337,10 @@ public class MockServletResponse implements ServletResponse {
      *
      * @return a boolean indicating if the response has been committed
      *
-     * @see #setBufferSize
-     * @see #getBufferSize
-     * @see #flushBuffer
-     * @see #reset
+     * @see #setBufferSize(int)
+     * @see #getBufferSize()
+     * @see #flushBuffer()
+     * @see #reset()
      */
     @Override
     public boolean isCommitted() {
@@ -315,15 +348,20 @@ public class MockServletResponse implements ServletResponse {
     }
 
     /**
-     * Clears any data that exists in the buffer as well as the status code and headers. If the
-     * response has been committed, this method throws an {@link IllegalStateException}.
+     * Clears any data that exists in the buffer as well as the status code, headers. The state of
+     * calling {@link #getWriter()} or {@link #getOutputStream()} is also cleared. It is legal, for
+     * instance, to call {@link #getWriter()}, {@link #reset()} and then {@link #getOutputStream()}.
+     * If {@link #getWriter()} or {@link #getOutputStream()} have been called before this method,
+     * then the corresponding returned Writer or OutputStream will be staled and the behavior of
+     * using the stale object is undefined. If the response has been committed, this method throws
+     * an {@link IllegalStateException}.
      *
      * @throws IllegalStateException if the response has already been committed
      *
-     * @see #setBufferSize
-     * @see #getBufferSize
-     * @see #flushBuffer
-     * @see #isCommitted
+     * @see #setBufferSize(int)
+     * @see #getBufferSize()
+     * @see #flushBuffer()
+     * @see #isCommitted()
      */
     @Override
     public void reset() {
@@ -333,17 +371,19 @@ public class MockServletResponse implements ServletResponse {
     /**
      * Sets the locale of the response, if the response has not been committed yet. It also sets
      * the response's character encoding appropriately for the locale, if the character encoding
-     * has not been explicitly set using {@link #setContentType} or {@link #setCharacterEncoding},
-     * {@code getWriter} hasn't been called yet, and the response hasn't been committed yet. If the
-     * deployment descriptor contains a {@code locale-encoding-mapping-list} element, and that
-     * element provides a mapping for the given locale, that mapping is used. Otherwise, the
-     * mapping from locale to character encoding is container dependent.
+     * has not been explicitly set using {@link #setContentType(String)} or
+     * {@link #setCharacterEncoding(String)}, {@code getWriter} hasn't been called yet, and the
+     * response hasn't been committed yet. If the deployment descriptor contains a
+     * {@code locale-encoding-mapping-list} element, and that element provides a mapping for the
+     * given locale, that mapping is used. Otherwise, the mapping from locale to character encoding
+     * is container dependent.
      *
      * <p>This method may be called repeatedly to change locale and character encoding. The method
      * has no effect if called after the response has been committed. It does not set the
-     * response's character encoding if it is called after {@link #setContentType} has been called
-     * with a charset specification, after {@link #setCharacterEncoding} has been called, after
-     * {@code getWriter} has been called, or after the response has been committed.</p>
+     * response's character encoding if it is called after {@link #setContentType(String)} has been
+     * called with a charset specification, after {@link #setCharacterEncoding(String)} has been
+     * called, after {@code getWriter} has been called, or after the response has been
+     * committed.</p>
      *
      * <p>Containers must communicate the locale and the character encoding used for the servlet
      * response's writer to the client if the protocol provides a way for doing so. In the case of
@@ -355,9 +395,9 @@ public class MockServletResponse implements ServletResponse {
      *
      * @param loc the locale of the response
      *
-     * @see #getLocale
-     * @see #setContentType
-     * @see #setCharacterEncoding
+     * @see #getLocale()
+     * @see #setContentType(String)
+     * @see #setCharacterEncoding(String)
      */
     @Override
     public void setLocale(Locale loc) {
@@ -365,11 +405,13 @@ public class MockServletResponse implements ServletResponse {
     }
 
     /**
-     * Returns the locale specified for this response using the {@link #setLocale} method. Calls
-     * made to {@code setLocale} after the response is committed have no effect. If no locale has
-     * been specified, the container's default locale is returned.
+     * Returns the locale specified for this response using the {@link #setLocale(Locale)} method.
+     * Calls made to {@code setLocale} after the response is committed have no effect. If no locale
+     * has been specified, the container's default locale is returned.
      *
-     * @see #setLocale
+     * @return the Locale for this response.
+     *
+     * @see #setLocale(Locale)
      */
     @Override
     public Locale getLocale() {

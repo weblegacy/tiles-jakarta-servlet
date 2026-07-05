@@ -23,6 +23,7 @@ package io.github.weblegacy.tiles2.servlet.wildcard;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import jakarta.servlet.ServletContext;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -31,7 +32,6 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
-import javax.servlet.ServletContext;
 import org.easymock.EasyMock;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

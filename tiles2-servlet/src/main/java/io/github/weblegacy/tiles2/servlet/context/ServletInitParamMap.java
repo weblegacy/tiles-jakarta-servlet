@@ -21,6 +21,7 @@
 
 package io.github.weblegacy.tiles2.servlet.context;
 
+import jakarta.servlet.ServletContext;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -29,7 +30,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.ServletContext;
 import org.apache.tiles.context.MapEntry;
 
 /**

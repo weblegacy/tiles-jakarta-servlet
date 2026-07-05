@@ -22,11 +22,11 @@
 package io.github.weblegacy.tiles2.servlet.wildcard;
 
 import io.github.weblegacy.tiles2.servlet.context.ServletTilesApplicationContext;
+import jakarta.servlet.ServletContext;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
-import javax.servlet.ServletContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.web.context.support.ServletContextResourcePatternResolver;

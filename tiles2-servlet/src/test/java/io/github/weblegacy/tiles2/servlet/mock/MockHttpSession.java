@@ -21,14 +21,14 @@
 
 package io.github.weblegacy.tiles2.servlet.mock;
 
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSessionActivationListener;
+import jakarta.servlet.http.HttpSessionBindingListener;
+import jakarta.servlet.http.HttpSessionContext;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionActivationListener;
-import javax.servlet.http.HttpSessionBindingListener;
-import javax.servlet.http.HttpSessionContext;
 
 /**
  * The mock-class for {@link HttpSession}.
@@ -162,14 +162,14 @@ public class MockHttpSession implements HttpSession {
      * Returns the maximum time interval, in seconds, that the servlet container will keep this
      * session open between client accesses. After this interval, the servlet container will
      * invalidate the session. The maximum time interval can be set with the
-     * {@link #setMaxInactiveInterval} method.
+     * {@link #setMaxInactiveInterval(int)} method.
      *
      * <p>A return value of zero or less indicates that the session will never timeout.</p>
      *
      * @return an integer specifying the number of seconds this session remains open between client
      *         requests
      *
-     * @see #setMaxInactiveInterval
+     * @see #setMaxInactiveInterval(int)
      */
     @Override
     public int getMaxInactiveInterval() {
@@ -178,6 +178,8 @@ public class MockHttpSession implements HttpSession {
 
     /**
      * Returns the context object within which sessions on the server are held.
+     *
+     * @return the {@link HttpSessionContext} for this session.
      *
      * @deprecated As of Version 2.1, this method is deprecated and has no replacement. It will be
      *             removed in a future version of the Java Servlet API.
@@ -216,12 +218,12 @@ public class MockHttpSession implements HttpSession {
      *
      * @throws IllegalStateException if this method is called on an invalidated session
      *
-     * @deprecated As of Version 2.2, this method is replaced by {@link #getAttribute}.
+     * @deprecated As of Version 2.2, this method is replaced by {@link #getAttribute(String)}.
      */
     @Override
     @Deprecated
     public Object getValue(String name) {
-        throw new UnsupportedOperationException();
+        return getAttribute(name);
     }
 
     /**
@@ -249,7 +251,7 @@ public class MockHttpSession implements HttpSession {
      *
      * @throws IllegalStateException if this method is called on an invalidated session
      *
-     * @deprecated As of Version 2.2, this method is replaced by {@link #getAttributeNames}.
+     * @deprecated As of Version 2.2, this method is replaced by {@link #getAttributeNames()}.
      */
     @Override
     @Deprecated
@@ -300,12 +302,13 @@ public class MockHttpSession implements HttpSession {
      *
      * @throws IllegalStateException if this method is called on an invalidated session
      *
-     * @deprecated As of Version 2.2, this method is replaced by {@link #setAttribute}.
+     * @deprecated As of Version 2.2, this method is replaced by
+     *             {@link #setAttribute(String, Object)}.
      */
     @Override
     @Deprecated
     public void putValue(String name, Object value) {
-        throw new UnsupportedOperationException();
+        setAttribute(name, value);
     }
 
     /**
@@ -338,12 +341,12 @@ public class MockHttpSession implements HttpSession {
      *
      * @throws IllegalStateException if this method is called on an invalidated session
      *
-     * @deprecated As of Version 2.2, this method is replaced by {@link #removeAttribute}.
+     * @deprecated As of Version 2.2, this method is replaced by {@link #removeAttribute(String)}.
      */
     @Override
     @Deprecated
     public void removeValue(String name) {
-        throw new UnsupportedOperationException();
+        removeAttribute(name);
     }
 
     /**

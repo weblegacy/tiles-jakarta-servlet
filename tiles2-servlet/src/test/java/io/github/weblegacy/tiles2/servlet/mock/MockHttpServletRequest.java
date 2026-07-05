@@ -21,6 +21,21 @@
 
 package io.github.weblegacy.tiles2.servlet.mock;
 
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSessionContext;
+import jakarta.servlet.http.HttpUpgradeHandler;
+import jakarta.servlet.http.HttpUtils;
+import jakarta.servlet.http.Part;
+import jakarta.servlet.http.WebConnection;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -29,22 +44,12 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionContext;
-import javax.servlet.http.HttpUtils;
-import javax.servlet.http.Part;
 
 /**
  * The mock-class for {@link HttpServletRequest}.
  *
- * <p>Extends the {@link javax.servlet.ServletRequest} interface to provide request information for
- * HTTP servlets.</p>
+ * <p>Extends the {@link ServletRequest} interface to provide request information for HTTP
+ * servlets.</p>
  *
  * <p>The servlet container creates an {@code HttpServletRequest} object and passes it as an
  * argument to the servlet's service methods ({@code doGet}, {@code doPost}, etc).</p>
@@ -322,6 +327,14 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
      * logical "role". Roles and role membership can be defined using deployment descriptors. If
      * the user has not been authenticated, the method returns {@code false}.
      *
+     * <p>The role name “*” should never be used as an argument in calling {@code isUserInRole}. Any
+     * call to {@code isUserInRole} with “*” must return {@code false}.<br>
+     * If the role-name of the security-role to be tested is “**”, and the application has NOT
+     * declared an application security-role with role-name “**”, {@code isUserInRole} must only
+     * return {@code true} if the user has been authenticated; that is, only when
+     * {@link #getRemoteUser()} and {@link #getUserPrincipal()} would both return a non-null value.
+     * Otherwise, the container must check the user for membership in the application role.</p>
+     *
      * @param role a {@code String} specifying the name of the role
      *
      * @return a {@code boolean} indicating whether the user making this request belongs to a given
@@ -352,7 +365,7 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
      * @return a {@code String} specifying the session ID, or {@code null} if the request did not
      *         specify a session ID
      *
-     * @see #isRequestedSessionIdValid
+     * @see #isRequestedSessionIdValid()
      */
     @Override
     public String getRequestedSessionId() {
@@ -383,12 +396,13 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
      *   </tr>
      * </table>
      *
-     * <p>To reconstruct an URL with a scheme and host, use {@link HttpUtils#getRequestURL}.</p>
+     * <p>To reconstruct an URL with a scheme and host, use
+     * {@link HttpUtils#getRequestURL(HttpServletRequest)}.</p>
      *
      * @return a {@code String} containing the part of the URL from the protocol name up to the
      *         query string
      *
-     * @see HttpUtils#getRequestURL
+     * @see HttpUtils#getRequestURL(HttpServletRequest)
      */
     @Override
     public String getRequestURI() {
@@ -400,9 +414,10 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
      * protocol, server name, port number, and server path, but it does not include query string
      * parameters.
      *
-     * <p>If this request has been forwarded using {@link RequestDispatcher#forward}, the server
-     * path in the reconstructed URL must reflect the path used to obtain the
-     * {@link RequestDispatcher}, and not the server path specified by the client.</p>
+     * <p>If this request has been forwarded using
+     * {@link RequestDispatcher#forward(ServletRequest, ServletResponse)}, the server path
+     * in the reconstructed URL must reflect the path used to obtain the {@link RequestDispatcher},
+     * and not the server path specified by the client.</p>
      *
      * <p>Because this method returns a {@code StringBuffer}, not a string, you can modify the URL
      * easily, for example, to append query parameters.</p>
@@ -473,6 +488,20 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
     }
 
     /**
+     * Change the session id of the current session associated with this request and return the new
+     * session id.
+     *
+     * @return the new session id
+     *
+     * @throws IllegalStateException if there is no session associated with the request
+     *
+     * @since Servlet 3.1
+     */
+    public String changeSessionId() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Checks whether the requested session ID is still valid.
      *
      * <p>If the client did not specify any session ID, this method returns {@code false}.</p>
@@ -480,8 +509,8 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
      * @return {@code true} if this request has an id for a valid session in the current session
      *         context; {@code false} otherwise
      *
-     * @see #getRequestedSessionId
-     * @see #getSession
+     * @see #getRequestedSessionId()
+     * @see #getSession()
      * @see HttpSessionContext
      */
     @Override
@@ -490,11 +519,12 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
     }
 
     /**
-     * Checks whether the requested session ID came in as a cookie.
+     * Checks whether the requested session ID was conveyed to the server as an HTTP cookie.
      *
-     * @return {@code true} if the session ID came in as a cookie; otherwise, {@code false}
+     * @return {@code true} if the session ID was conveyed to the server an an HTTP cookie;
+     *         otherwise, {@code false}
      *
-     * @see #getSession
+     * @see #getSession()
      */
     @Override
     public boolean isRequestedSessionIdFromCookie() {
@@ -502,11 +532,13 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
     }
 
     /**
-     * Checks whether the requested session ID came in as part of the request URL.
+     * Checks whether the requested session ID was conveyed to the server as part of the request
+     * URL.
      *
-     * @return {@code true} if the session ID came in as part of a URL; otherwise, {@code false}
+     * @return {@code true} if the session ID was conveyed to the server as part of a URL;
+     *         otherwise, {@code false}
      *
-     * @see #getSession
+     * @see #getSession()
      */
     @Override
     public boolean isRequestedSessionIdFromURL() {
@@ -514,17 +546,19 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
     }
 
     /**
-     * Returns {@code true} if the session id for this request was provided from the client as part
-     * of a URL; {@code false} otherwise. Note that the spelling URL in the method name indicates
-     * that the method is new.
+     * Checks whether the requested session ID was conveyed to the server as part of the request
+     * URL.
+     *
+     * @return {@code true} if the session ID was conveyed to the server as part of a URL;
+     *         otherwise, {@code false}
      *
      * @deprecated As of Version 2.1 of the Java Servlet API, use
-     *             {@link #isRequestedSessionIdFromURL} instead.
+     *             {@link #isRequestedSessionIdFromURL()} instead.
      */
     @Override
     @Deprecated
     public boolean isRequestedSessionIdFromUrl() {
-        throw new UnsupportedOperationException();
+        return isRequestedSessionIdFromURL();
     }
 
     /**
@@ -602,22 +636,24 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
      * Gets all the {@link Part} components of this request, provided that it is of type
      * {@code multipart/form-data}.
      *
-     * <p>If this request is of type {@code multipart/form-data}, but does not contain any Part
-     * components, the returned {@code Collection} will be empty.</p>
+     * <p>If this request is of type {@code multipart/form-data}, but does not contain any
+     * {@code Part} components, the returned {@code Collection} will be empty.</p>
      *
      * <p>Any changes to the returned {@code Collection} must not affect this
      * {@code HttpServletRequest}.</p>
      *
-     * @return a (possibly empty) {@code Collection} of the Part components of this request
+     * @return a (possibly empty) {@code Collection} of the {@code Part} components of this request
      *
      * @throws IOException           if an I/O error occurred during the retrieval of the
      *                               {@link Part} components of this request
      * @throws ServletException      if this request is not of type {@code multipart/form-data}
      * @throws IllegalStateException if the request body is larger than {@code maxRequestSize}, or
-     *                               any Part in the request is larger than {@code maxFileSize}
+     *                               any {@code Part} in the request is larger than
+     *                               {@code maxFileSize}, or there is no {@code @MultipartConfig} or
+     *                               {@code multipart-config} in deployment descriptors
      *
-     * @see javax.servlet.annotation.MultipartConfig#maxFileSize
-     * @see javax.servlet.annotation.MultipartConfig#maxRequestSize
+     * @see MultipartConfig#maxFileSize()
+     * @see MultipartConfig#maxRequestSize()
      *
      * @since Servlet 3.0
      */
@@ -628,23 +664,49 @@ public class MockHttpServletRequest extends MockServletRequest implements HttpSe
     /**
      * Gets the {@link Part} with the given name.
      *
-     * @param name the name of the requested Part
+     * @param name the name of the requested {@code Part}
      *
-     * @return The Part with the given name, or {@code null} if this request is of type
-     *         {@code multipart/form-data}, but does not contain the requested Part
+     * @return The {@code Part} with the given name, or {@code null} if this request is of type
+     *         {@code multipart/form-data}, but does not contain the requested {@code Part}
      *
      * @throws IOException           if an I/O error occurred during the retrieval of the requested
-     *                               Part
+     *                               {@code Part}
      * @throws ServletException      if this request is not of type {@code multipart/form-data}
      * @throws IllegalStateException if the request body is larger than {@code maxRequestSize}, or
-     *                               any Part in the request is larger than {@code maxFileSize}
+     *                               any {@code Part} in the request is larger than
+     *                               {@code maxFileSize}, or there is no {@code @MultipartConfig} or
+     *                               {@code multipart-config} in deployment descriptors
      *
-     * @see javax.servlet.annotation.MultipartConfig#maxFileSize
-     * @see javax.servlet.annotation.MultipartConfig#maxRequestSize
+     * @see MultipartConfig#maxFileSize()
+     * @see MultipartConfig#maxRequestSize()
      *
      * @since Servlet 3.0
      */
     public Part getPart(String name) throws IOException, ServletException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Create an instance of {@code HttpUpgradeHandler} for an given class and uses it for the http
+     * protocol upgrade processing.
+     *
+     * @param <T>          The {@code Class}, which extends {@link HttpUpgradeHandler}, of the
+     *                     {@code handlerClass}.
+     * @param handlerClass The {@code HttpUpgradeHandler} class used for the upgrade.
+     *
+     * @return an instance of the {@code HttpUpgradeHandler}
+     *
+     * @throws IOException      if an I/O error occurred during the upgrade
+     * @throws ServletException if the given {@code handlerClass} fails to be instantiated
+     *
+     * @see HttpUpgradeHandler
+     * @see WebConnection
+     *
+     * @since Servlet 3.1
+     */
+    public <T extends HttpUpgradeHandler> T  upgrade(Class<T> handlerClass)
+            throws IOException, ServletException {
+
         throw new UnsupportedOperationException();
     }
 }

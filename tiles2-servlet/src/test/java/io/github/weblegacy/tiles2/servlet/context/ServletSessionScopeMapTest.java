@@ -23,10 +23,10 @@ package io.github.weblegacy.tiles2.servlet.context;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import java.util.Map;
 import java.util.Vector;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import org.easymock.EasyMock;
 import org.junit.jupiter.api.Test;
 

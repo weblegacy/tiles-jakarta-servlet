@@ -21,6 +21,31 @@
 
 package io.github.weblegacy.tiles2.servlet.mock;
 
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextAttributeListener;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRegistration;
+import jakarta.servlet.ServletRequestAttributeListener;
+import jakarta.servlet.ServletRequestListener;
+import jakarta.servlet.ServletSecurityElement;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.SessionTrackingMode;
+import jakarta.servlet.SingleThreadModel;
+import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.annotation.ServletSecurity;
+import jakarta.servlet.annotation.WebListener;
+import jakarta.servlet.descriptor.JspConfigDescriptor;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSessionAttributeListener;
+import jakarta.servlet.http.HttpSessionIdListener;
+import jakarta.servlet.http.HttpSessionListener;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -30,22 +55,6 @@ import java.util.EventListener;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.Filter;
-import javax.servlet.FilterRegistration;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
-import javax.servlet.ServletRequestListener;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.SessionTrackingMode;
-import javax.servlet.SingleThreadModel;
-import javax.servlet.descriptor.JspConfigDescriptor;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * The mock-class for {@link ServletContext}.
@@ -67,8 +76,8 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author Various
  *
- * @see Servlet#getServletConfig
- * @see ServletConfig#getServletContext
+ * @see Servlet#getServletConfig()
+ * @see ServletConfig#getServletContext()
  */
 public class MockServletContext implements ServletContext {
 
@@ -97,9 +106,10 @@ public class MockServletContext implements ServletContext {
      * Returns the context path of the web application.
      *
      * <p>The context path is the portion of the request URI that is used to select the context of
-     * the request. The context path always comes first in a request URI. The path starts with a
-     * {@code /} character but does not end with a {@code /} character. For servlets in the
-     * default (root) context, this method returns "".</p>
+     * the request. The context path always comes first in a request URI. If this context is the
+     * "root" context rooted at the base of the Web server's URL name space, this path will be an
+     * empty string. Otherwise, if the context is not rooted at the root of the server's name space,
+     * the path starts with a / character but does not end with a / character.</p>
      *
      * <p>It is possible that a servlet container may match a context by more than one context
      * path. In such cases the {@link HttpServletRequest#getContextPath()} will return the
@@ -107,7 +117,7 @@ public class MockServletContext implements ServletContext {
      * method. The context path returned by this method should be considered as the prime or
      * preferred context path of the application.</p>
      *
-     * @return The context path of the web application, or "" for the default (root) context
+     * @return The context path of the web application, or "" for the root context
      *
      * @see HttpServletRequest#getContextPath()
      *
@@ -146,18 +156,18 @@ public class MockServletContext implements ServletContext {
 
     /**
      * Returns the major version of the Servlet API that this servlet container supports. All
-     * implementations that comply with Version 3.0 must have this method return the integer 3.
+     * implementations that comply with Version 5.0 must have this method return the integer 3.
      *
-     * @return 3
+     * @return 5
      */
     @Override
     public int getMajorVersion() {
-        return 3;
+        return 5;
     }
 
     /**
      * Returns the minor version of the Servlet API that this servlet container supports. All
-     * implementations that comply with Version 3.0 must have this method return the integer 0.
+     * implementations that comply with Version 5.0 must have this method return the integer 0.
      *
      * @return 0
      */
@@ -170,18 +180,19 @@ public class MockServletContext implements ServletContext {
      * Gets the major version of the Servlet specification that the application represented by this
      * ServletContext is based on.
      *
-     * <p>The value returned may be different from {@link #getMajorVersion}, which returns the
+     * <p>The value returned may be different from {@link #getMajorVersion()}, which returns the
      * major version of the Servlet specification supported by the Servlet container.</p>
      *
      * @return the major version of the Servlet specification that the application represented by
      *         this ServletContext is based on
      *
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -193,18 +204,19 @@ public class MockServletContext implements ServletContext {
      * Gets the minor version of the Servlet specification that the application represented by this
      * ServletContext is based on.
      *
-     * <p>The value returned may be different from {@link #getMinorVersion}, which returns the
+     * <p>The value returned may be different from {@link #getMinorVersion()}, which returns the
      * minor version of the Servlet specification supported by the Servlet container.</p>
      *
      * @return the minor version of the Servlet specification that the application represented by
      *         this ServletContext is based on
      *
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -237,9 +249,12 @@ public class MockServletContext implements ServletContext {
      * the {@code /META-INF/resources} directory of a JAR file inside the web application's
      * {@code /WEB-INF/lib} directory, and have a leading {@code /}.</p>
      *
+     * <p>The returned set is not backed by the {@code ServletContext} object, so changes in the
+     * returned set are not reflected in the {@code ServletContext} object, and vice-versa.</p>
+     *
      * <p>For example, for a web application containing:</p>
      *
-     * {@code <pre>
+     * <pre>{@code
      *   /welcome.html
      *   /catalog/index.html
      *   /catalog/products.html
@@ -249,7 +264,7 @@ public class MockServletContext implements ServletContext {
      *   /WEB-INF/web.xml
      *   /WEB-INF/classes/com.acme.OrderServlet.class
      *   /WEB-INF/lib/catalog.jar!/META-INF/resources/catalog/moreOffers/books.html
-     * </pre>}
+     * }</pre>
      *
      * {@code getResourcePaths("/")} would return
      * {@code {"/welcome.html", "/catalog/", "/customer/", "/WEB-INF/"}}, and
@@ -295,7 +310,7 @@ public class MockServletContext implements ServletContext {
      * page returns the JSP source code. Use a {@code RequestDispatcher} instead to include
      * results of an execution.</p>
      *
-     * <p>This method has a different purpose than {@link Class#getResource}, which looks up
+     * <p>This method has a different purpose than {@link Class#getResource(String)}, which looks up
      * resources based on a class loader. This method does not use class loaders.</p>
      *
      * @param path a {@code String} specifying the path to the resource
@@ -323,9 +338,9 @@ public class MockServletContext implements ServletContext {
      * <p>The servlet container must implement the URL handlers and {@code URLConnection} objects
      * necessary to access the resource.</p>
      *
-     * <p>This method is different from {@link Class#getResourceAsStream}, which uses a class
-     * loader. This method allows servlet containers to make a resource available to a servlet from
-     * any location, without using a class loader.</p>
+     * <p>This method is different from {@link Class#getResourceAsStream(String)}, which uses a
+     * class loader. This method allows servlet containers to make a resource available to a servlet
+     * from any location, without using a class loader.</p>
      *
      * @param path a {@code String} specifying the path to the resource
      *
@@ -357,7 +372,7 @@ public class MockServletContext implements ServletContext {
      *         {@code RequestDispatcher}
      *
      * @see RequestDispatcher
-     * @see ServletContext#getContext
+     * @see ServletContext#getContext(String)
      */
     @Override
     public RequestDispatcher getRequestDispatcher(String path) {
@@ -369,7 +384,7 @@ public class MockServletContext implements ServletContext {
      *
      * <p>Servlets (and JSP pages also) may be given names via server administration or via a web
      * application deployment descriptor. A servlet instance can determine its name using
-     * {@link ServletConfig#getServletName}.</p>
+     * {@link ServletConfig#getServletName()}.</p>
      *
      * <p>This method returns {@code null} if the {@code ServletContext} cannot return a
      * {@code RequestDispatcher} for any reason.</p>
@@ -380,8 +395,8 @@ public class MockServletContext implements ServletContext {
      *         {@code null} if the {@code ServletContext} cannot return a {@code RequestDispatcher}
      *
      * @see RequestDispatcher
-     * @see ServletContext#getContext
-     * @see ServletConfig#getServletName
+     * @see ServletContext#getContext(String)
+     * @see ServletConfig#getServletName()
      */
     @Override
     public RequestDispatcher getNamedDispatcher(String name) {
@@ -389,9 +404,15 @@ public class MockServletContext implements ServletContext {
     }
 
     /**
-     * In lieu of this method, servlets can share information using the {@code ServletContext}
-     * class and can perform shared business logic by invoking methods on common non-servlet
-     * classes.
+     * In lieu of this method, servlets can share information using the {@code ServletContext} class
+     * and can perform shared business logic by invoking methods on common non-servlet classes.
+     *
+     * @param name the servlet name
+     *
+     * @return the {@link Servlet} with the given name
+     *
+     * @throws ServletException if an exception has occurred that interfaces with servlet's normal
+     *                          operation
      *
      * @deprecated As of Java Servlet API 2.1, with no direct replacement.
      *
@@ -407,7 +428,7 @@ public class MockServletContext implements ServletContext {
     }
 
     /**
-     * Return an {@code Enumeration} of all the servlets known to this ServletContext.
+     * Return an {@code Enumeration} of {@link Servlet}.
      *
      * @deprecated As of Java Servlet API 2.0, with no replacement.
      *
@@ -424,7 +445,7 @@ public class MockServletContext implements ServletContext {
     }
 
     /**
-     * Return an {@code Enumeration} of all the servlet names known to this context.
+     * Return an {@code Enumeration} of {@link Servlet} names.
      *
      * @deprecated As of Java Servlet API 2.1, with no replacement.
      *
@@ -454,8 +475,10 @@ public class MockServletContext implements ServletContext {
     /**
      * Write an exception's stack trace and an explanatory error message to the servlet log file.
      *
-     * @deprecated As of Java Servlet API 2.1, use
-     *             {@link #log(String message, Throwable throwable)} instead.
+     * @param exception the {@code Exception} error
+     * @param msg       a {@code String} that describes the exception
+     *
+     * @deprecated As of Java Servlet API 2.1, use {@link #log(String, Throwable)} instead.
      *
      *             <p>This method was originally defined to write an exception's stack trace and an
      *             explanatory error message to the servlet log file.</p>
@@ -463,7 +486,7 @@ public class MockServletContext implements ServletContext {
     @Override
     @Deprecated
     public void log(Exception exception, String msg) {
-        throw new UnsupportedOperationException();
+        log(msg, exception);
     }
 
     /**
@@ -535,9 +558,12 @@ public class MockServletContext implements ServletContext {
      *
      * @param name a {@code String} containing the name of the parameter whose value is requested
      *
-     * @return a {@code String} containing at least the servlet container name and version number
+     * @return a {@code String} containing the value of the context's initialization parameter, or
+     *         {@code null} if the context's initialization parameter does not exist.
      *
-     * @see ServletConfig#getInitParameter
+     * @throws NullPointerException if the argument {@code name} is {@code null}
+     *
+     * @see ServletConfig#getInitParameter(String)
      */
     @Override
     public String getInitParameter(String name) {
@@ -552,7 +578,7 @@ public class MockServletContext implements ServletContext {
      * @return an {@code Enumeration} of {@code String} objects containing the names of the
      *         context's initialization parameters
      *
-     * @see ServletConfig#getInitParameter
+     * @see ServletConfig#getInitParameter(String)
      */
     @Override
     public Enumeration<String> getInitParameterNames() {
@@ -572,12 +598,14 @@ public class MockServletContext implements ServletContext {
      *         a matching name
      *
      * @throws IllegalStateException         if this ServletContext has already been initialized
+     * @throws NullPointerException          if the name parameter is {@code null}
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -606,7 +634,9 @@ public class MockServletContext implements ServletContext {
      * @return an {@code Object} containing the value of the attribute, or {@code null} if no
      *         attribute exists matching the given name
      *
-     * @see ServletContext#getAttributeNames
+     * @throws NullPointerException if the argument {@code name} is {@code null}
+     *
+     * @see ServletContext#getAttributeNames()
      */
     @Override
     public Object getAttribute(String name) {
@@ -617,12 +647,12 @@ public class MockServletContext implements ServletContext {
      * Returns an {@code Enumeration} containing the attribute names available within this
      * ServletContext.
      *
-     * <p>Use the {@link #getAttribute} method with an attribute name to get the value of an
+     * <p>Use the {@link #getAttribute(String)} method with an attribute name to get the value of an
      * attribute.</p>
      *
      * @return an {@code Enumeration} of attribute names
      *
-     * @see #getAttribute
+     * @see #getAttribute(String)
      */
     @Override
     public Enumeration<String> getAttributeNames() {
@@ -646,6 +676,8 @@ public class MockServletContext implements ServletContext {
      *
      * @param name   a {@code String} specifying the name of the attribute
      * @param object an {@code Object} representing the attribute to be bound
+     *
+     * @throws NullPointerException if the name parameter is {@code null}
      */
     @Override
     public void setAttribute(String name, Object object) {
@@ -654,7 +686,7 @@ public class MockServletContext implements ServletContext {
 
     /**
      * Removes the attribute with the given name from the ServletContext. After removal,
-     * subsequent calls to {@link #getAttribute} to retrieve the attribute's value will
+     * subsequent calls to {@link #getAttribute(String)} to retrieve the attribute's value will
      * return {@code null}.
      *
      * <p>If listeners are configured on the {@code ServletContext} the container notifies them
@@ -696,8 +728,7 @@ public class MockServletContext implements ServletContext {
      * {@code className} to it) and returned.</p>
      *
      * <p>This method introspects the class with the given {@code className} for the
-     * {@link javax.servlet.annotation.ServletSecurity},
-     * {@link javax.servlet.annotation.MultipartConfig}, {@code javax.annotation.security.RunAs},
+     * {@link ServletSecurity}, {@link MultipartConfig}, {@code javax.annotation.security.RunAs},
      * and {@code javax.annotation.security.DeclareRoles} annotations. In addition, this method
      * supports resource injection if the class with the given {@code className} represents a
      * Managed Bean. See the Java EE platform and JSR 299 specifications for additional details
@@ -711,12 +742,15 @@ public class MockServletContext implements ServletContext {
      *         ServletRegistration for a servlet with the given {@code servletName}
      *
      * @throws IllegalStateException         if this ServletContext has already been initialized
+     * @throws IllegalArgumentException      if {@code servletName} is {@code null} or an empty
+     *                                       String
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -747,13 +781,15 @@ public class MockServletContext implements ServletContext {
      *
      * @throws IllegalStateException         if this ServletContext has already been initialized
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      * @throws IllegalArgumentException      if the given servlet instance implements
-     *                                       {@link SingleThreadModel}
+     *                                       {@link SingleThreadModel}, or {@code servletName} is
+     *                                       {@code null} or an empty String
      *
      * @since Servlet 3.0
      */
@@ -773,8 +809,7 @@ public class MockServletContext implements ServletContext {
      * given {@code servletClass} to it) and returned.</p>
      *
      * <p>This method introspects the given {@code servletClass} for the
-     * {@link javax.servlet.annotation.ServletSecurity},
-     * {@link javax.servlet.annotation.MultipartConfig}, {@code javax.annotation.security.RunAs},
+     * {@link ServletSecurity}, {@link MultipartConfig}, {@code javax.annotation.security.RunAs},
      * and {@code javax.annotation.security.DeclareRoles} annotations. In addition, this method
      * supports resource injection if the given {@code servletClass} represents a Managed Bean.
      * See the Java EE platform and JSR 299 specifications for additional details about Managed
@@ -788,12 +823,15 @@ public class MockServletContext implements ServletContext {
      *         ServletRegistration for the given {@code servletName}
      *
      * @throws IllegalStateException         if this ServletContext has already been initialized
+     * @throws IllegalArgumentException      if {@code servletName} is {@code null} or an empty
+     *                                       String
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -801,6 +839,41 @@ public class MockServletContext implements ServletContext {
     public ServletRegistration.Dynamic addServlet(String servletName,
             Class<? extends Servlet> servletClass) {
 
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Adds the servlet with the given jsp file to this servlet context.
+     *
+     * <p>The registered servlet may be further configured via the returned
+     * {@link ServletRegistration} object.</p>
+     *
+     * <p>If this ServletContext already contains a preliminary ServletRegistration for a servlet
+     * with the given {@code servletName}, it will be completed (by assigning the given
+     * {@code jspFile} to it) and returned.</p>
+     *
+     * @param servletName the name of the servlet
+     * @param jspFile     the full path to a JSP file within the web application beginning with a
+     *                    '/'.
+     *
+     * @return a ServletRegistration object that may be used to further configure the registered
+     *         servlet, or {@code null} if this ServletContext already contains a complete
+     *         ServletRegistration for a servlet with the given {@code servletName}
+     *
+     * @throws IllegalStateException         if this ServletContext has already been initialized
+     * @throws IllegalArgumentException      if {@code servletName} is {@code null} or an empty
+     *                                       String
+     * @throws UnsupportedOperationException if this ServletContext was passed to the
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
+     *                                       {@code web-fragment.xml}, nor annotated with
+     *                                       {@link WebListener}
+     *
+     * @since Servlet 4.0
+     */
+    public ServletRegistration.Dynamic addJspFile(String servletName, String jspFile) {
         throw new UnsupportedOperationException();
     }
 
@@ -814,24 +887,25 @@ public class MockServletContext implements ServletContext {
      * instantiate it.</p>
      *
      * <p>This method introspects the given {@code clazz} for the following annotations:
-     * {@link javax.servlet.annotation.ServletSecurity},
-     * {@link javax.servlet.annotation.MultipartConfig}, {@code javax.annotation.security.RunAs},
+     * {@link ServletSecurity}, {@link MultipartConfig}, {@code javax.annotation.security.RunAs},
      * and {@code javax.annotation.security.DeclareRoles}. In addition, this method supports
      * resource injection if the given {@code clazz} represents a Managed Bean. See the Java EE
      * platform and JSR 299 specifications for additional details about Managed Beans and resource
      * injection.</p>
      *
+     * @param <T>   the class of the Servlet to create
      * @param clazz the Servlet class to instantiate
      *
      * @return the new Servlet instance
      *
      * @throws ServletException              if the given {@code clazz} fails to be instantiated
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -844,15 +918,18 @@ public class MockServletContext implements ServletContext {
      * Gets the ServletRegistration corresponding to the servlet with the given
      * {@code servletName}.
      *
+     * @param servletName the name of a servlet
+     *
      * @return the (complete or preliminary) ServletRegistration for the servlet with the given
      *         {@code servletName}, or null if no ServletRegistration exists under that name
      *
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -867,7 +944,8 @@ public class MockServletContext implements ServletContext {
      *
      * <p>The returned Map includes the ServletRegistration objects corresponding to all declared
      * and annotated servlets, as well as the ServletRegistration objects corresponding to all
-     * servlets that have been added via one of the {@code addServlet} methods.</p>
+     * servlets that have been added via one of the {@code addServlet} and {@code addJspFile}
+     * methods.</p>
      *
      * <p>If permitted, any changes to the returned Map must not affect this ServletContext.</p>
      *
@@ -875,11 +953,12 @@ public class MockServletContext implements ServletContext {
      *         all servlets currently registered with this ServletContext
      *
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -913,12 +992,15 @@ public class MockServletContext implements ServletContext {
      *         FilterRegistration for a filter with the given {@code filterName}
      *
      * @throws IllegalStateException         if this ServletContext has already been initialized
+     * @throws IllegalArgumentException      if {@code servletName} is {@code null} or an empty
+     *                                       String
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -948,12 +1030,15 @@ public class MockServletContext implements ServletContext {
      *         the same container
      *
      * @throws IllegalStateException         if this ServletContext has already been initialized
+     * @throws IllegalArgumentException      if {@code servletName} is {@code null} or an empty
+     *                                       String
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -984,12 +1069,15 @@ public class MockServletContext implements ServletContext {
      *         FilterRegistration for a filter with the given {@code filterName}
      *
      * @throws IllegalStateException         if this ServletContext has already been initialized
+     * @throws IllegalArgumentException      if {@code servletName} is {@code null} or an empty
+     *                                       String
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -1013,17 +1101,19 @@ public class MockServletContext implements ServletContext {
      * Bean. See the Java EE platform and JSR 299 specifications for additional details about
      * Managed Beans and resource injection.</p>
      *
+     * @param <T>   the class of the Filter to create
      * @param clazz the Filter class to instantiate
      *
      * @return the new Filter instance
      *
      * @throws ServletException              if the given {@code clazz} fails to be instantiated
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -1035,15 +1125,18 @@ public class MockServletContext implements ServletContext {
     /**
      * Gets the FilterRegistration corresponding to the filter with the given {@code filterName}.
      *
+     * @param filterName the name of a filter
+     *
      * @return the (complete or preliminary) FilterRegistration for the filter with the given
      *         {@code filterName}, or null if no FilterRegistration exists under that name
      *
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -1066,11 +1159,12 @@ public class MockServletContext implements ServletContext {
      *         all filters currently registered with this ServletContext
      *
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -1091,11 +1185,12 @@ public class MockServletContext implements ServletContext {
      *         configured
      *
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -1116,11 +1211,12 @@ public class MockServletContext implements ServletContext {
      *
      * @throws IllegalStateException         if this ServletContext has already been initialized
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      * @throws IllegalArgumentException      if {@code sessionTrackingModes} specifies a
      *                                       combination of {@code SessionTrackingMode.SSL} with a
      *                                       session tracking mode other than
@@ -1140,15 +1236,19 @@ public class MockServletContext implements ServletContext {
      * Gets the session tracking modes that are supported by default for this
      * {@code ServletContext}.
      *
+     * <p>The returned set is not backed by the {@code ServletContext} object, so changes in the
+     * returned set are not reflected in the {@code ServletContext} object, and vice-versa.</p>
+     *
      * @return set of the session tracking modes supported by default for this
      *         {@code ServletContext}
      *
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -1161,19 +1261,20 @@ public class MockServletContext implements ServletContext {
      * Gets the session tracking modes that are in effect for this {@code ServletContext}.
      *
      * <p>The session tracking modes in effect are those provided to
-     * {@link #setSessionTrackingModes setSessionTrackingModes}.</p>
+     * {@link #setSessionTrackingModes(Set)}.</p>
      *
-     * <p>By default, the session tracking modes returned by
-     * {@link #getDefaultSessionTrackingModes getDefaultSessionTrackingModes} are in effect.</p>
+     * <p>The returned set is not backed by the {@code ServletContext} object, so changes in the
+     * returned set are not reflected in the {@code ServletContext} object, and vice-versa.</p>
      *
      * @return set of the session tracking modes in effect for this {@code ServletContext}
      *
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -1190,11 +1291,12 @@ public class MockServletContext implements ServletContext {
      * following interfaces:</p>
      *
      * <ul>
-     * <li>{@code {@link ServletContextAttributeListener}}</li>
-     * <li>{@code {@link ServletRequestListener}}</li>
-     * <li>{@code {@link ServletRequestAttributeListener}}</li>
-     * <li>{@code {@link javax.servlet.http.HttpSessionListener}}</li>
-     * <li>{@code {@link javax.servlet.http.HttpSessionAttributeListener}}</li>
+     * <li>{@link ServletContextAttributeListener}</li>
+     * <li>{@link ServletRequestListener}</li>
+     * <li>{@link ServletRequestAttributeListener}</li>
+     * <li>{@link HttpSessionAttributeListener}</li>
+     * <li>{@link HttpSessionIdListener}</li>
+     * <li>{@link HttpSessionListener}</li>
      * </ul>
      *
      * <p>If this ServletContext was passed to {@link ServletContainerInitializer#onStartup}, then
@@ -1206,8 +1308,8 @@ public class MockServletContext implements ServletContext {
      *
      * <p>If the class with the given name implements a listener interface whose invocation order
      * corresponds to the declaration order (i.e., if it implements {@link ServletRequestListener},
-     * {@link ServletContextListener}, or {@link javax.servlet.http.HttpSessionListener}), then the
-     * new listener will be added to the end of the ordered list of listeners of that interface.</p>
+     * {@link ServletContextListener}, or {@link HttpSessionListener}), then the new listener will
+     * be added to the end of the ordered list of listeners of that interface.</p>
      *
      * <p>This method supports resource injection if the class with the given {@code className}
      * represents a Managed Bean. See the Java EE platform and JSR 299 specifications for
@@ -1222,11 +1324,12 @@ public class MockServletContext implements ServletContext {
      *                                       {@link ServletContainerInitializer#onStartup}
      * @throws IllegalStateException         if this ServletContext has already been initialized
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -1241,11 +1344,12 @@ public class MockServletContext implements ServletContext {
      * <p>The given listener must be an instance of one or more of the following interfaces:</p>
      *
      * <ul>
-     * <li>{@code {@link ServletContextAttributeListener}}</li>
-     * <li>{@code {@link ServletRequestListener}}</li>
-     * <li>{@code {@link ServletRequestAttributeListener}}</li>
-     * <li>{@code {@link javax.servlet.http.HttpSessionListener}}</li>
-     * <li>{@code {@link javax.servlet.http.HttpSessionAttributeListener}}</li>
+     * <li>{@link ServletContextAttributeListener}</li>
+     * <li>{@link ServletRequestListener}</li>
+     * <li>{@link ServletRequestAttributeListener}</li>
+     * <li>{@link HttpSessionAttributeListener}</li>
+     * <li>{@link HttpSessionIdListener}</li>
+     * <li>{@link HttpSessionListener}</li>
      * </ul>
      *
      * <p>If this ServletContext was passed to {@link ServletContainerInitializer#onStartup}, then
@@ -1255,10 +1359,11 @@ public class MockServletContext implements ServletContext {
      * <p>If the given listener is an instance of a listener interface whose invocation order
      * corresponds to the declaration order (i.e., if it is an instance of
      * {@link ServletRequestListener}, {@link ServletContextListener}, or
-     * {@link javax.servlet.http.HttpSessionListener}), then the listener will be added to the end
-     * of the ordered list of listeners of that interface.</p>
+     * {@link HttpSessionListener}), then the listener will be added to the end of the ordered list
+     * of listeners of that interface.</p>
      *
-     * @param t the listener to be added
+     * @param <T> the class of the EventListener to add
+     * @param t   the listener to be added
      *
      * @throws IllegalArgumentException      if the given listener is not an instance of any of the
      *                                       above interfaces, or if it is an instance of
@@ -1267,11 +1372,12 @@ public class MockServletContext implements ServletContext {
      *                                       {@link ServletContainerInitializer#onStartup}
      * @throws IllegalStateException         if this ServletContext has already been initialized
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -1287,11 +1393,12 @@ public class MockServletContext implements ServletContext {
      * interfaces:</p>
      *
      * <ul>
-     * <li>{@code {@link ServletContextAttributeListener}}</li>
-     * <li>{@code {@link ServletRequestListener}}</li>
-     * <li>{@code {@link ServletRequestAttributeListener}}</li>
-     * <li>{@code {@link javax.servlet.http.HttpSessionListener}}</li>
-     * <li>{@code {@link javax.servlet.http.HttpSessionAttributeListener}}</li>
+     * <li>{@link ServletContextAttributeListener}</li>
+     * <li>{@link ServletRequestListener}</li>
+     * <li>{@link ServletRequestAttributeListener}</li>
+     * <li>{@link HttpSessionAttributeListener}</li>
+     * <li>{@link HttpSessionIdListener}</li>
+     * <li>{@link HttpSessionListener}</li>
      * </ul>
      *
      * <p>If this ServletContext was passed to {@link ServletContainerInitializer#onStartup}, then
@@ -1301,8 +1408,8 @@ public class MockServletContext implements ServletContext {
      * <p>If the given {@code listenerClass} implements a listener interface whose invocation
      * order corresponds to the declaration order (i.e., if it implements
      * {@link ServletRequestListener}, {@link ServletContextListener}, or
-     * {@link javax.servlet.http.HttpSessionListener}), then the new listener will be added to the
-     * end of the ordered list of listeners of that interface.</p>
+     * {@link HttpSessionListener}), then the new listener will be added to the end of the ordered
+     * list of listeners of that interface.</p>
      *
      * <p>This method supports resource injection if the given {@code listenerClass} represents a
      * Managed Bean. See the Java EE platform and JSR 299 specifications for additional details
@@ -1317,11 +1424,12 @@ public class MockServletContext implements ServletContext {
      *                                       {@link ServletContainerInitializer#onStartup}
      * @throws IllegalStateException         if this ServletContext has already been initialized
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
      * @since Servlet 3.0
      */
@@ -1334,10 +1442,10 @@ public class MockServletContext implements ServletContext {
      * Instantiates the given EventListener class.
      *
      * <p>The specified EventListener class must implement at least one of the
-     * {@code {@link ServletContextListener}}, {@code {@link ServletContextAttributeListener}},
-     * {@code {@link ServletRequestListener}}, {@code {@link ServletRequestAttributeListener}},
-     * {@code {@link javax.servlet.http.HttpSessionListener}}, or
-     * {@code {@link javax.servlet.http.HttpSessionAttributeListener}} interfaces.</p>
+     * {@link ServletContextListener}, {@link ServletContextAttributeListener},
+     * {@link ServletRequestListener}, {@link ServletRequestAttributeListener},
+     * {@link HttpSessionAttributeListener}, {@link HttpSessionIdListener}, or
+     * {@link HttpSessionListener} interfaces.</p>
      *
      * <p>The returned EventListener instance may be further customized before it is registered
      * with this ServletContext via a call to {@link #addListener(EventListener)}.</p>
@@ -1349,28 +1457,27 @@ public class MockServletContext implements ServletContext {
      * Bean. See the Java EE platform and JSR 299 specifications for additional details about
      * Managed Beans and resource injection.</p>
      *
+     * @param <T>   the class of the EventListener to create
      * @param clazz the EventListener class to instantiate
      *
      * @return the new EventListener instance
      *
      * @throws ServletException              if the given {@code clazz} fails to be instantiated
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      * @throws IllegalArgumentException      if the specified EventListener class does not
-     *                                       implement any of the
-     *                                       {@code {@link ServletContextListener}},
-     *                                       {@code {@link ServletContextAttributeListener}},
-     *                                       {@code {@link ServletRequestListener}},
-     *                                       {@code {@link ServletRequestAttributeListener}},
-     *                                       {@code {@link
-     *                                       javax.servlet.http.HttpSessionListener}}, or {@code
-     *                                       {@link
-     *                                       javax.servlet.http.HttpSessionAttributeListener}}
-     *                                       interfaces.
+     *                                       implement any of the {@link ServletContextListener},
+     *                                       {@link ServletContextAttributeListener},
+     *                                       {@link ServletRequestListener},
+     *                                       {@link ServletRequestAttributeListener},
+     *                                       {@link HttpSessionAttributeListener},
+     *                                       {@link HttpSessionIdListener}, or
+     *                                       {@link HttpSessionListener} interfaces.
      *
      * @since Servlet 3.0
      */
@@ -1389,13 +1496,14 @@ public class MockServletContext implements ServletContext {
      *         represented by this ServletContext, or null if no such configuration exists
      *
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      *
-     * @see javax.servlet.descriptor.JspConfigDescriptor
+     * @see JspConfigDescriptor
      *
      * @since Servlet 3.0
      */
@@ -1415,11 +1523,12 @@ public class MockServletContext implements ServletContext {
      * @return the class loader of the web application represented by this ServletContext
      *
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      * @throws SecurityException             if a security manager denies access to the requested
      *                                       class loader
      *
@@ -1434,18 +1543,19 @@ public class MockServletContext implements ServletContext {
      * Declares role names that are tested using {@code isUserInRole}.
      *
      * <p>Roles that are implicitly declared as a result of their use within the
-     * {@link ServletRegistration.Dynamic#setServletSecurity setServletSecurity} or
-     * {@link ServletRegistration.Dynamic#setRunAsRole setRunAsRole} methods of the
+     * {@link ServletRegistration.Dynamic#setServletSecurity(ServletSecurityElement)} or
+     * {@link ServletRegistration.Dynamic#setRunAsRole(String)} methods of the
      * {@link ServletRegistration} interface need not be declared.</p>
      *
      * @param roleNames the role names being declared
      *
      * @throws UnsupportedOperationException if this ServletContext was passed to the
-     *                                       {@link ServletContextListener#contextInitialized}
-     *                                       method of a {@link ServletContextListener} that was
-     *                                       neither declared in {@code web.xml} or
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
      *                                       {@code web-fragment.xml}, nor annotated with
-     *                                       {@link javax.servlet.annotation.WebListener}
+     *                                       {@link WebListener}
      * @throws IllegalArgumentException      if any of the argument roleNames is null or the empty
      *                                       string
      * @throws IllegalStateException         if the ServletContext has already been initialized
@@ -1454,6 +1564,166 @@ public class MockServletContext implements ServletContext {
      */
     @Override
     public void declareRoles(String... roleNames) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Returns the configuration name of the logical host on which the ServletContext is deployed.
+     *
+     * <p>Servlet containers may support multiple logical hosts. This method must return the same
+     * name for all the servlet contexts deployed on a logical host, and the name returned by this
+     * method must be distinct, stable per logical host, and suitable for use in associating server
+     * configuration information with the logical host. The returned value is NOT expected or
+     * required to be equivalent to a network address or hostname of the logical host.</p>
+     *
+     * @return a {@code String} containing the configuration name of the logical host on which the
+     *         servlet context is deployed.
+     *
+     * @throws UnsupportedOperationException if this ServletContext was passed to the
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
+     *                                       {@code web-fragment.xml}, nor annotated with
+     *                                       {@link WebListener}
+     *
+     * @since Servlet 3.1
+     */
+    @Override
+    public String getVirtualServerName() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Gets the session timeout in minutes that are supported by default for this
+     * {@code ServletContext}.
+     *
+     * @return the session timeout in minutes that are supported by default for this
+     *         {@code ServletContext}
+     *
+     * @throws UnsupportedOperationException if this ServletContext was passed to the
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
+     *                                       {@code web-fragment.xml}, nor annotated with
+     *                                       {@link WebListener}
+     *
+     * @since Servlet 4.0
+     */
+    @Override
+    public int getSessionTimeout() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Sets the session timeout in minutes for this ServletContext.
+     *
+     * @param sessionTimeout session timeout in minutes
+     *
+     * @throws IllegalStateException         if this ServletContext has already been initialized
+     * @throws UnsupportedOperationException if this ServletContext was passed to the
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
+     *                                       {@code web-fragment.xml}, nor annotated with
+     *                                       {@link WebListener}
+     *
+     * @since Servlet 4.0
+     */
+    @Override
+    public void setSessionTimeout(int sessionTimeout) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Gets the request character encoding that are supported by default for this
+     * {@code ServletContext}. This method returns {@code null} if no request encoding character
+     * encoding has been specified in deployment descriptor or container specific configuration (for
+     * all web applications in the container).
+     *
+     * @return the request character encoding that are supported by default for this
+     *         {@code ServletContext}
+     *
+     * @throws UnsupportedOperationException if this ServletContext was passed to the
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
+     *                                       {@code web-fragment.xml}, nor annotated with
+     *                                       {@link WebListener}
+     *
+     * @since Servlet 4.0
+     */
+    @Override
+    public String getRequestCharacterEncoding() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Sets the request character encoding for this ServletContext.
+     *
+     * @param encoding request character encoding
+     *
+     * @throws IllegalStateException         if this ServletContext has already been initialized
+     * @throws UnsupportedOperationException if this ServletContext was passed to the
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
+     *                                       {@code web-fragment.xml}, nor annotated with
+     *                                       {@link WebListener}
+     *
+     * @since Servlet 4.0
+     */
+    @Override
+    public void setRequestCharacterEncoding(String encoding) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Gets the response character encoding that are supported by default for this
+     * {@code ServletContext}. This method returns {@code null} if no response encoding character
+     * encoding has been specified in deployment descriptor or container specific configuration (for
+     * all web applications in the container).
+     *
+     * @return the request character encoding that are supported by default for this
+     *         {@code ServletContext}
+     *
+     * @throws UnsupportedOperationException if this ServletContext was passed to the
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
+     *                                       {@code web-fragment.xml}, nor annotated with
+     *                                       {@link WebListener}
+     *
+     * @since Servlet 4.0
+     */
+    @Override
+    public String getResponseCharacterEncoding() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Sets the response character encoding for this ServletContext.
+     *
+     * @param encoding response character encoding
+     *
+     * @throws IllegalStateException         if this ServletContext has already been initialized
+     * @throws UnsupportedOperationException if this ServletContext was passed to the
+     *                                       {@link ServletContextListener
+     *                                       #contextInitialized(ServletContextEvent)} method of a
+     *                                       {@link ServletContextListener} that was neither
+     *                                       declared in {@code web.xml} or
+     *                                       {@code web-fragment.xml}, nor annotated with
+     *                                       {@link WebListener}
+     *
+     * @since Servlet 4.0
+     */
+    @Override
+    public void setResponseCharacterEncoding(String encoding) {
         throw new UnsupportedOperationException();
     }
 }

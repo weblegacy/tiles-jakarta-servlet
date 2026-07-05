@@ -55,7 +55,7 @@
         <fludioVersion>2.1.0</fludioVersion>
         <surefireVersion>3.6.0-M1</surefireVersion>
         <slf4jVersion>2.0.18</slf4jVersion>
-        <springVersion>5.3.39</springVersion>
+        <springVersion>6.2.19</springVersion>
 
         <tiles2Version>2.2.2</tiles2Version>
 
@@ -376,9 +376,9 @@
             </dependency>
 
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>3.0.1</version>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>5.0.0</version>
             </dependency>
 
             <dependency>

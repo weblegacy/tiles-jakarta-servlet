@@ -21,6 +21,21 @@
 
 package io.github.weblegacy.tiles2.servlet.mock;
 
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.AsyncEvent;
+import jakarta.servlet.AsyncListener;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletRequestWrapper;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.ServletResponseWrapper;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -32,19 +47,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import javax.servlet.AsyncContext;
-import javax.servlet.AsyncListener;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestWrapper;
-import javax.servlet.ServletResponse;
-import javax.servlet.ServletResponseWrapper;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * The mock-class for {@link ServletRequest}.
@@ -55,8 +57,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * <p>A {@code ServletRequest} object provides data including parameter name and values, attributes,
  * and an input stream. Interfaces that extend {@code ServletRequest} can provide additional
- * protocol-specific data (for example, HTTP data is provided by
- * {@link javax.servlet.http.HttpServletRequest}.</p>
+ * protocol-specific data (for example, HTTP data is provided by {@link HttpServletRequest}.</p>
  *
  * @author Various
  *
@@ -128,7 +129,12 @@ public class MockServletRequest implements ServletRequest {
 
     /**
      * Returns the name of the character encoding used in the body of this request. This method
-     * returns {@code null} if the request does not specify a character encoding.
+     * returns {@code null} if no request encoding character encoding has been specified. The
+     * following methods for specifying the request character encoding are consulted, in decreasing
+     * order of priority: per request, per web app (using
+     * {@link ServletContext#setRequestCharacterEncoding(String)}, deployment descriptor), and per
+     * container (for all web applications deployed in that container, using vendor specific
+     * configuration).
      *
      * @return a {@code String} containing the name of the character encoding, or {@code null} if
      *         the request does not specify a character encoding
@@ -156,14 +162,28 @@ public class MockServletRequest implements ServletRequest {
 
     /**
      * Returns the length, in bytes, of the request body and made available by the input stream, or
-     * {@code -1} if the length is not known. For HTTP servlets, same as the value of the CGI
-     * variable {@code CONTENT_LENGTH}.
+     * {@code -1} if the length is not known or is greater than {link Integer#MAX_VALUE}. For HTTP
+     * servlets, same as the value of the CGI variable {@code CONTENT_LENGTH}.
      *
      * @return an integer containing the length of the request body or {@code -1} if the length is
-     *         not known
+     *         not known or is greater than {@link Integer#MAX_VALUE}.
      */
     @Override
     public int getContentLength() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Returns the length, in bytes, of the request body and made available by the input stream, or
+     * {@code -1} if the length is not known. For HTTP servlets, same as the value of the CGI
+     * variable {@code CONTENT_LENGTH}.
+     *
+     * @return a long containing the length of the request body or {@code -1L} if the length is not
+     *         known
+     *
+     * @since Servlet 3.1
+     */
+    public long getContentLengthLong() {
         throw new UnsupportedOperationException();
     }
 
@@ -181,11 +201,11 @@ public class MockServletRequest implements ServletRequest {
 
     /**
      * Retrieves the body of the request as binary data using a {@link ServletInputStream}. Either
-     * this method or {@link #getReader} may be called to read the body, not both.
+     * this method or {@link #getReader()} may be called to read the body, not both.
      *
      * @return a {@link ServletInputStream} object containing the body of the request
      *
-     * @throws IllegalStateException if the {@link #getReader} method has already been called for
+     * @throws IllegalStateException if the {@link #getReader()} method has already been called for
      *                               this request
      * @throws IOException           if an input or output exception occurred
      */
@@ -200,20 +220,20 @@ public class MockServletRequest implements ServletRequest {
      * For HTTP servlets, parameters are contained in the query string or posted form data.
      *
      * <p>You should only use this method when you are sure the parameter has only one value. If
-     * the parameter might have more than one value, use {@link #getParameterValues}.</p>
+     * the parameter might have more than one value, use {@link #getParameterValues(String)}.</p>
      *
      * <p>If you use this method with a multivalued parameter, the value returned is equal to the
      * first value in the array returned by {@code getParameterValues}.</p>
      *
      * <p>If the parameter data was sent in the request body, such as occurs with an HTTP POST
-     * request, then reading the body directly via {@link #getInputStream} or {@link #getReader}
+     * request, then reading the body directly via {@link #getInputStream()} or {@link #getReader()}
      * can interfere with the execution of this method.</p>
      *
      * @param name a {@code String} specifying the name of the parameter
      *
      * @return a {@code String} representing the single value of the parameter
      *
-     * @see #getParameterValues
+     * @see #getParameterValues(String)
      */
     @Override
     public String getParameter(String name) {
@@ -245,7 +265,7 @@ public class MockServletRequest implements ServletRequest {
      *
      * @return an array of {@code String} objects containing the parameter's values
      *
-     * @see #getParameter
+     * @see #getParameter(String)
      */
     @Override
     public String[] getParameterValues(String name) {
@@ -325,17 +345,17 @@ public class MockServletRequest implements ServletRequest {
     /**
      * Retrieves the body of the request as character data using a {@code BufferedReader}. The
      * reader translates the character data according to the character encoding used on the body.
-     * Either this method or {@link #getInputStream} may be called to read the body, not both.
+     * Either this method or {@link #getInputStream()} may be called to read the body, not both.
      *
      * @return a {@code BufferedReader} containing the body of the request
      *
      * @throws UnsupportedEncodingException if the character set encoding used is not supported and
      *                                      the text cannot be decoded
-     * @throws IllegalStateException        if {@link #getInputStream} method has been called on
+     * @throws IllegalStateException        if {@link #getInputStream()} method has been called on
      *                                      this request
      * @throws IOException                  if an input or output exception occurred
      *
-     * @see #getInputStream
+     * @see #getInputStream()
      */
     @Override
     public BufferedReader getReader() throws IOException {
@@ -370,11 +390,9 @@ public class MockServletRequest implements ServletRequest {
      * Stores an attribute in this request. Attributes are reset between requests. This method is
      * most often used in conjunction with {@link RequestDispatcher}.
      *
-     * <p>Attribute names should follow the same conventions as package names. Names beginning with
-     * {@code java.*}, {@code javax.*}, and {@code com.sun.*}, are reserved for use by Sun
-     * Microsystems.<br>
+     * <p>Attribute names should follow the same conventions as package names.<br>
      * If the object passed in is {@code null}, the effect is the same as calling
-     * {@link #removeAttribute}.<br>
+     * {@link #removeAttribute(String)}.<br>
      * It is warned that when the request is dispatched from the servlet resides in a different web
      * application by {@code RequestDispatcher}, the object set by this method may not be correctly
      * retrieved in the caller servlet.</p>
@@ -459,8 +477,8 @@ public class MockServletRequest implements ServletRequest {
      * context root. This method returns {@code null} if the servlet container cannot return a
      * {@code RequestDispatcher}.</p>
      *
-     * <p>The difference between this method and {@link ServletContext#getRequestDispatcher} is
-     * that this method can take a relative path.</p>
+     * <p>The difference between this method and {@link ServletContext#getRequestDispatcher(String)}
+     * is that this method can take a relative path.</p>
      *
      * @param path a {@code String} specifying the pathname to the resource. If it is relative, it
      *             must be relative against the current servlet.
@@ -470,7 +488,7 @@ public class MockServletRequest implements ServletRequest {
      *         {@code RequestDispatcher}
      *
      * @see RequestDispatcher
-     * @see ServletContext#getRequestDispatcher
+     * @see ServletContext#getRequestDispatcher(String)
      */
     @Override
     public RequestDispatcher getRequestDispatcher(String path) {
@@ -485,8 +503,12 @@ public class MockServletRequest implements ServletRequest {
      *
      * <p>Returns {@code null} if the translation could not be performed for any reason.</p>
      *
+     * @param path the path for which the real path is to be returned.
+     *
+     * @return the <i>real</i> path, or {@code >null} if the translation cannot be performed.
+     *
      * @deprecated As of Version 2.1 of the Java Servlet API, use
-     *             {@link ServletContext#getRealPath} instead.
+     *             {@link ServletContext#getRealPath(String)} instead.
      */
     @Override
     @Deprecated
@@ -563,7 +585,7 @@ public class MockServletRequest implements ServletRequest {
      * original (unwrapped) ServletRequest and ServletResponse objects.
      *
      * <p>Calling this method will cause committal of the associated response to be delayed until
-     * {@link AsyncContext#complete} is called on the returned {@link AsyncContext}, or the
+     * {@link AsyncContext#complete()} is called on the returned {@link AsyncContext}, or the
      * asynchronous operation has timed out.</p>
      *
      * <p>Calling {@link AsyncContext#hasOriginalRequestAndResponse()} on the returned AsyncContext
@@ -576,7 +598,7 @@ public class MockServletRequest implements ServletRequest {
      * <p>This method clears the list of {@link AsyncListener} instances (if any) that were
      * registered with the AsyncContext returned by the previous call to one of the startAsync
      * methods, after calling each AsyncListener at its
-     * {@link AsyncListener#onStartAsync onStartAsync} method.</p>
+     * {@link AsyncListener#onStartAsync(AsyncEvent)} method.</p>
      *
      * <p>Subsequent invocations of this method, or its overloaded variant, will return the same
      * AsyncContext instance, reinitialized as appropriate.</p>
@@ -585,12 +607,14 @@ public class MockServletRequest implements ServletRequest {
      *
      * @throws IllegalStateException if this request is within the scope of a filter or servlet
      *                               that does not support asynchronous operations (that is,
-     *                               {@link #isAsyncSupported} returns false), or if this method is
-     *                               called again without any asynchronous dispatch (resulting from
-     *                               one of the {@link AsyncContext#dispatch} methods), is called
-     *                               outside the scope of any such dispatch, or is called again
-     *                               within the scope of the same dispatch, or if the response has
-     *                               already been closed
+     *                               {@link #isAsyncSupported()} returns false), or if this method
+     *                               is called again without any asynchronous dispatch (resulting
+     *                               from one of the {@link AsyncContext#dispatch} methods), is
+     *                               called outside the scope of any such dispatch, or is called
+     *                               again within the scope of the same dispatch, or if the response
+     *                               has already been closed
+     *
+     * @see AsyncContext#dispatch()
      *
      * @since Servlet 3.0
      */
@@ -604,12 +628,12 @@ public class MockServletRequest implements ServletRequest {
      *
      * <p>The ServletRequest and ServletResponse arguments must be the same instances, or instances
      * of {@link ServletRequestWrapper} and {@link ServletResponseWrapper} that wrap them, that
-     * were passed to the {@link Servlet#service service} method of the Servlet or the
-     * {@link Filter#doFilter doFilter} method of the Filter, respectively, in whose scope this
-     * method is being called.</p>
+     * were passed to the {@link Servlet#service(ServletRequest, ServletResponse)} method of the
+     * Servlet or the {@link Filter#doFilter(ServletRequest, ServletResponse, FilterChain)} method
+     * of the Filter, respectively, in whose scope this method is being called.</p>
      *
      * <p>Calling this method will cause committal of the associated response to be delayed until
-     * {@link AsyncContext#complete} is called on the returned {@link AsyncContext}, or the
+     * {@link AsyncContext#complete()} is called on the returned {@link AsyncContext}, or the
      * asynchronous operation has timed out.</p>
      *
      * <p>Calling {@link AsyncContext#hasOriginalRequestAndResponse()} on the returned AsyncContext
@@ -628,7 +652,7 @@ public class MockServletRequest implements ServletRequest {
      * <p>This method clears the list of {@link AsyncListener} instances (if any) that were
      * registered with the AsyncContext returned by the previous call to one of the startAsync
      * methods, after calling each AsyncListener at its
-     * {@link AsyncListener#onStartAsync onStartAsync} method.</p>
+     * {@link AsyncListener#onStartAsync(AsyncEvent)} method.</p>
      *
      * <p>Subsequent invocations of this method, or its zero-argument variant, will return the same
      * AsyncContext instance, reinitialized as appropriate. If a call to this method is followed by
@@ -642,12 +666,12 @@ public class MockServletRequest implements ServletRequest {
      *
      * @throws IllegalStateException if this request is within the scope of a filter or servlet that
      *                               does not support asynchronous operations (that is,
-     *                               {@link #isAsyncSupported} returns false), or if this method is
-     *                               called again without any asynchronous dispatch (resulting from
-     *                               one of the {@link AsyncContext#dispatch} methods), is called
-     *                               outside the scope of any such dispatch, or is called again
-     *                               within the scope of the same dispatch, or if the response has
-     *                               already been closed
+     *                               {@link #isAsyncSupported()} returns false), or if this method
+     *                               is called again without any asynchronous dispatch (resulting
+     *                               from one of the {@link AsyncContext#dispatch} methods), is
+     *                               called outside the scope of any such dispatch, or is called
+     *                               again within the scope of the same dispatch, or if the response
+     *                               has already been closed
      *
      * @since Servlet 3.0
      */
@@ -660,12 +684,12 @@ public class MockServletRequest implements ServletRequest {
     /**
      * Checks if this request has been put into asynchronous mode.
      *
-     * <p>A ServletRequest is put into asynchronous mode by calling {@link #startAsync} or
+     * <p>A ServletRequest is put into asynchronous mode by calling {@link #startAsync()} or
      * {@link #startAsync(ServletRequest,ServletResponse)} on it.</p>
      *
      * <p>This method returns {@code false} if this request was put into asynchronous mode, but has
      * since been dispatched using one of the {@link AsyncContext#dispatch} methods or released from
-     * asynchronous mode via a call to {@link AsyncContext#complete}.</p>
+     * asynchronous mode via a call to {@link AsyncContext#complete()}.</p>
      *
      * @return {@code true} if this request has been put into asynchronous mode, {@code false}
      *         otherwise
@@ -693,14 +717,14 @@ public class MockServletRequest implements ServletRequest {
 
     /**
      * Gets the AsyncContext that was created or reinitialized by the most recent invocation of
-     * {@link #startAsync} or {@link #startAsync(ServletRequest,ServletResponse)} on this request.
+     * {@link #startAsync()} or {@link #startAsync(ServletRequest,ServletResponse)} on this request.
      *
      * @return the AsyncContext that was created or reinitialized by the most recent invocation of
-     *         {@link #startAsync} or {@link #startAsync(ServletRequest,ServletResponse)} on this
+     *         {@link #startAsync()} or {@link #startAsync(ServletRequest,ServletResponse)} on this
      *         request
      *
      * @throws IllegalStateException if this request has not been put into asynchronous mode, i.e.,
-     *                               if neither {@link #startAsync} nor
+     *                               if neither {@link #startAsync()} nor
      *                               {@link #startAsync(ServletRequest,ServletResponse)} has been
      *                               called
      *

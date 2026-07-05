@@ -21,7 +21,7 @@
 
 package io.github.weblegacy.tiles2.web.util;
 
-import javax.servlet.ServletRequest;
+import jakarta.servlet.ServletRequest;
 import org.apache.tiles.AttributeContext;
 
 /**
