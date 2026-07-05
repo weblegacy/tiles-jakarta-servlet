@@ -15,7 +15,7 @@
 
     <properties>
         <!-- Configuration properties for the OSGi maven-bundle-plugin -->
-        <tiles.osgi.symbolicName>org.apache.tiles.servlet</tiles.osgi.symbolicName>
+        <tiles.osgi.symbolicName>io.github.weblegacy.tiles.jakarta.servlet</tiles.osgi.symbolicName>
     </properties>
 
     <dependencies>

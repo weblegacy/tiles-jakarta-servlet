@@ -16,7 +16,7 @@
 
     <properties>
         <!-- Configuration properties for the OSGi maven-bundle-plugin -->
-        <tiles.osgi.symbolicName>org.apache.tiles.servlet.wildcard</tiles.osgi.symbolicName>
+        <tiles.osgi.symbolicName>io.github.weblegacy.tiles.jakarta.servlet.wildcard</tiles.osgi.symbolicName>
     </properties>
 
     <dependencies>
