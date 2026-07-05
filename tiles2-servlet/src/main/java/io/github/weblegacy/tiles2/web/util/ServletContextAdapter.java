@@ -25,13 +25,22 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.EventListener;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
+import javax.servlet.Filter;
+import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
+import javax.servlet.ServletRegistration.Dynamic;
+import javax.servlet.SessionCookieConfig;
+import javax.servlet.SessionTrackingMode;
+import javax.servlet.descriptor.JspConfigDescriptor;
 
 /**
  * Adapts a servlet config and a servlet context to become a unique servlet context.
@@ -56,7 +65,6 @@ public class ServletContextAdapter implements ServletContext {
      *
      * @param config The servlet configuration object.
      */
-    @SuppressWarnings("unchecked")
     public ServletContextAdapter(ServletConfig config) {
         this.rootContext = config.getServletContext();
         initParameters = new Hashtable<String, String>();
@@ -95,8 +103,7 @@ public class ServletContextAdapter implements ServletContext {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("rawtypes")
-    public Set getResourcePaths(String string) {
+    public Set<String> getResourcePaths(String string) {
         return rootContext.getResourcePaths(string);
     }
 
@@ -121,19 +128,20 @@ public class ServletContextAdapter implements ServletContext {
     }
 
     /** {@inheritDoc} */
+    @Deprecated
     public Servlet getServlet(String string) throws ServletException {
         return rootContext.getServlet(string);
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("rawtypes")
-    public Enumeration getServlets() {
+    @Deprecated
+    public Enumeration<Servlet> getServlets() {
         return rootContext.getServlets();
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("rawtypes")
-    public Enumeration getServletNames() {
+    @Deprecated
+    public Enumeration<String> getServletNames() {
         return rootContext.getServletNames();
     }
 
@@ -168,8 +176,7 @@ public class ServletContextAdapter implements ServletContext {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("rawtypes")
-    public Enumeration getInitParameterNames() {
+    public Enumeration<String> getInitParameterNames() {
         return initParameters.keys();
     }
 
@@ -179,8 +186,7 @@ public class ServletContextAdapter implements ServletContext {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("rawtypes")
-    public Enumeration getAttributeNames() {
+    public Enumeration<String> getAttributeNames() {
         return rootContext.getAttributeNames();
     }
 
@@ -204,21 +210,184 @@ public class ServletContextAdapter implements ServletContext {
         return rootContext.getContextPath();
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public int getEffectiveMajorVersion() {
+        return rootContext.getEffectiveMajorVersion();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int getEffectiveMinorVersion() {
+        return rootContext.getEffectiveMinorVersion();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean setInitParameter(String name, String value) {
+        if (initParameters.contains(name)) {
+            return false;
+        }
+        initParameters.put(name, value);
+        return true;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Dynamic addServlet(String servletName, String className) {
+        return rootContext.addServlet(servletName, className);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Dynamic addServlet(String servletName, Servlet servlet) {
+        return rootContext.addServlet(servletName, servlet);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Dynamic addServlet(String servletName, Class<? extends Servlet> servletClass) {
+        return rootContext.addServlet(servletName, servletClass);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public <T extends Servlet> T createServlet(Class<T> clazz) throws ServletException {
+        return rootContext.createServlet(clazz);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public ServletRegistration getServletRegistration(String servletName) {
+        return rootContext.getServletRegistration(servletName);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Map<String, ? extends ServletRegistration> getServletRegistrations() {
+        return rootContext.getServletRegistrations();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public FilterRegistration.Dynamic addFilter(String filterName, String className) {
+        return rootContext.addFilter(filterName, className);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public FilterRegistration.Dynamic addFilter(String filterName, Filter filter) {
+        return rootContext.addFilter(filterName, filter);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public FilterRegistration.Dynamic addFilter(String filterName,
+            Class<? extends Filter> filterClass) {
+
+        return rootContext.addFilter(filterName, filterClass);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public <T extends Filter> T createFilter(Class<T> clazz) throws ServletException {
+        return rootContext.createFilter(clazz);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public FilterRegistration getFilterRegistration(String filterName) {
+        return rootContext.getFilterRegistration(filterName);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Map<String, ? extends FilterRegistration> getFilterRegistrations() {
+        return rootContext.getFilterRegistrations();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public SessionCookieConfig getSessionCookieConfig() {
+        return rootContext.getSessionCookieConfig();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setSessionTrackingModes(Set<SessionTrackingMode> sessionTrackingModes) {
+        rootContext.setSessionTrackingModes(sessionTrackingModes);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Set<SessionTrackingMode> getDefaultSessionTrackingModes() {
+        return rootContext.getDefaultSessionTrackingModes();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Set<SessionTrackingMode> getEffectiveSessionTrackingModes() {
+        return rootContext.getEffectiveSessionTrackingModes();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void addListener(String className) {
+        rootContext.addListener(className);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public <T extends EventListener> void addListener(T t) {
+        rootContext.addListener(t);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void addListener(Class<? extends EventListener> listenerClass) {
+        rootContext.addListener(listenerClass);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public <T extends EventListener> T createListener(Class<T> clazz) throws ServletException {
+        return rootContext.createListener(clazz);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public JspConfigDescriptor getJspConfigDescriptor() {
+        return rootContext.getJspConfigDescriptor();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public ClassLoader getClassLoader() {
+        return rootContext.getClassLoader();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void declareRoles(String... roleNames) {
+        rootContext.declareRoles(roleNames);
+    }
+
     /**
      * Composes an enumeration into a single one.
+     *
+     * @param <T> Type of enumeration
      */
-    @SuppressWarnings("rawtypes")
-    class CompositeEnumeration implements Enumeration {
+    class CompositeEnumeration<T> implements Enumeration<T> {
 
         /**
          * The first enumeration to consider.
          */
-        private Enumeration first;
+        private Enumeration<T> first;
 
         /**
          * The second enumeration to consider.
          */
-        private Enumeration second;
+        private Enumeration<T> second;
 
         /**
          * Constructor.
@@ -226,7 +395,7 @@ public class ServletContextAdapter implements ServletContext {
          * @param first  The first enumeration to consider.
          * @param second The second enumeration to consider.
          */
-        public CompositeEnumeration(Enumeration first, Enumeration second) {
+        public CompositeEnumeration(Enumeration<T> first, Enumeration<T> second) {
             this.first = first;
             this.second = second;
         }
@@ -237,7 +406,7 @@ public class ServletContextAdapter implements ServletContext {
         }
 
         /** {@inheritDoc} */
-        public Object nextElement() {
+        public T nextElement() {
             if (first.hasMoreElements()) {
                 return first.nextElement();
             }

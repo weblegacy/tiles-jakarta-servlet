@@ -180,8 +180,7 @@ public class TilesFilter extends TilesServlet implements Filter {
 
         /** {@inheritDoc} */
         @Deprecated
-        @SuppressWarnings("rawtypes")
-        public Enumeration getInitParameterNames() {
+        public Enumeration<String> getInitParameterNames() {
             return config.getInitParameterNames();
         }
     }

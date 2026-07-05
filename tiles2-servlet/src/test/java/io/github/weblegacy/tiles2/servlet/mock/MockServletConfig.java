@@ -29,6 +29,9 @@ import javax.servlet.ServletContext;
 
 /**
  * The mock-class for {@link ServletConfig}.
+ *
+ * <p>A servlet configuration object used by a servlet container to pass information to a servlet
+ * during initialization.</p>
  */
 public class MockServletConfig implements ServletConfig {
 
@@ -87,12 +90,12 @@ public class MockServletConfig implements ServletConfig {
     }
 
     /**
-     * Returns a {@code String} containing the value of the named initialization parameter, or
-     * {@code null} if the parameter does not exist.
+     * Gets the value of the initialization parameter with the given name.
      *
-     * @param name a {@code String} specifying the name of the initialization parameter
+     * @param name the name of the initialization parameter whose value to get
      *
-     * @return a {@code String} containing the value of the initialization parameter
+     * @return a {@code String} containing the value of the initialization parameter, or
+     *         {@code null} if the initialization parameter does not exist
      */
     @Override
     public String getInitParameter(String name) {
@@ -108,8 +111,7 @@ public class MockServletConfig implements ServletConfig {
      *         servlet's initialization parameters
      */
     @Override
-    @SuppressWarnings("rawtypes")
-    public Enumeration getInitParameterNames() {
+    public Enumeration<String> getInitParameterNames() {
         return Collections.enumeration(initParameters.keySet());
     }
 }

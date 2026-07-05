@@ -21,48 +21,42 @@
 
 package io.github.weblegacy.tiles2.servlet.mock;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
+import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionContext;
 import javax.servlet.http.HttpUtils;
+import javax.servlet.http.Part;
 
 /**
  * The mock-class for {@link HttpServletRequest}.
+ *
+ * <p>Extends the {@link javax.servlet.ServletRequest} interface to provide request information for
+ * HTTP servlets.</p>
+ *
+ * <p>The servlet container creates an {@code HttpServletRequest} object and passes it as an
+ * argument to the servlet's service methods ({@code doGet}, {@code doPost}, etc).</p>
+ *
+ * @author Various
  */
-@SuppressWarnings("deprecation")
-public class MockHttpServletRequest implements HttpServletRequest {
-
-    /**
-     * The http-servlet-request's parameters.
-     */
-    private final LinkedHashMap<String, ArrayList<String>> parameters = new LinkedHashMap<>();
+public class MockHttpServletRequest extends MockServletRequest implements HttpServletRequest {
 
     /**
      * The http-servlet-request's parameters.
      */
     private final LinkedHashMap<String, ArrayList<String>> headers = new LinkedHashMap<>();
-
-    /**
-     * Holds all attributes of this http-session.
-     */
-    private final LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
 
     /**
      * The current {@code HttpSession} associated with this request.
@@ -93,16 +87,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
      */
     public void addHeader(String name, String value) {
         headers.computeIfAbsent(name, n -> new ArrayList<>()).add(value);
-    }
-
-    /**
-     * Adds a new parameter to the http-servlet-request.
-     *
-     * @param name  the name of the parameter
-     * @param value the value of the parameter
-     */
-    public void addParameter(String name, String value) {
-        parameters.computeIfAbsent(name, n -> new ArrayList<>()).add(value);
     }
 
     /**
@@ -194,8 +178,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
      *         does not allow access to header information, return {@code null}
      */
     @Override
-    @SuppressWarnings("rawtypes")
-    public Enumeration getHeaders(String name) {
+    public Enumeration<String> getHeaders(String name) {
         final List<String> values = headers.get(name);
         return values == null || values.isEmpty()
                 ? Collections.emptyEnumeration()
@@ -214,8 +197,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
      *         use this method, {@code null}
      */
     @Override
-    @SuppressWarnings("rawtypes")
-    public Enumeration getHeaderNames() {
+    public Enumeration<String> getHeaderNames() {
         return Collections.enumeration(headers.keySet());
     }
 
@@ -546,462 +528,123 @@ public class MockHttpServletRequest implements HttpServletRequest {
     }
 
     /**
-     * Returns the value of the named attribute as an {@code Object}, or {@code null} if no
-     * attribute of the given name exists.
+     * Use the container login mechanism configured for the {@code ServletContext} to authenticate
+     * the user making this request.
      *
-     * <p>Attributes can be set two ways. The servlet container may set attributes to make
-     * available custom information about a request. For example, for requests made using HTTPS,
-     * the attribute {@code javax.servlet.request.X509Certificate} can be used to retrieve
-     * information on the certificate of the client. Attributes can also be set programatically
-     * using {@link ServletRequest#setAttribute}. This allows information to be embedded into a
-     * request before a {@link RequestDispatcher} call.</p>
+     * <p>This method may modify and commit the argument {@code HttpServletResponse}.</p>
      *
-     * <p>Attribute names should follow the same conventions as package names. This specification
-     * reserves names matching {@code java.*}, {@code javax.*}, and {@code sun.*}.</p>
+     * @param response The {@code HttpServletResponse} associated with this
+     *                 {@code HttpServletRequest}
      *
-     * @param name a {@code String} specifying the name of the attribute
+     * @return {@code true} when non-null values were or have been established as the values
+     *         returned by {@code getUserPrincipal}, {@code getRemoteUser}, and {@code getAuthType}.
+     *         Return {@code false} if authentication is incomplete and the underlying login
+     *         mechanism has committed, in the response, the message (e.g., challenge) and HTTP
+     *         status code to be returned to the user.
      *
-     * @return an {@code Object} containing the value of the attribute, or {@code null} if the
-     *         attribute does not exist
+     * @throws IOException           if an input or output error occurred while reading from this
+     *                               request or writing to the given response
+     * @throws IllegalStateException if the login mechanism attempted to modify the response and it
+     *                               was already committed
+     * @throws ServletException      if the authentication failed and the caller is responsible for
+     *                               handling the error (i.e., the underlying login mechanism did
+     *                               NOT establish the message and HTTP status code to be returned
+     *                               to the user)
+     *
+     * @since Servlet 3.0
      */
-    @Override
-    public Object getAttribute(String name) {
-        return attributes.get(name);
-    }
-
-    /**
-     * Returns an {@code Enumeration} containing the names of the attributes available to this
-     * request. This method returns an empty {@code Enumeration} if the request has no attributes
-     * available to it.
-     *
-     * @return an {@code Enumeration} of strings containing the names of the request's attributes
-     */
-    @Override
-    @SuppressWarnings("rawtypes")
-    public Enumeration getAttributeNames() {
-        return Collections.enumeration(attributes.keySet());
-    }
-
-    /**
-     * Returns the name of the character encoding used in the body of this request. This method
-     * returns {@code null} if the request does not specify a character encoding.
-     *
-     * @return a {@code String} containing the name of the character encoding, or {@code null} if
-     *         the request does not specify a character encoding
-     */
-    @Override
-    public String getCharacterEncoding() {
+    public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * Overrides the name of the character encoding used in the body of this request. This method
-     * must be called prior to reading request parameters or reading input using getReader().
-     * Otherwise, it has no effect.
+     * Validate the provided username and password in the password validation realm used by the web
+     * container login mechanism configured for the {@code ServletContext}.
      *
-     * @param env {@code String} containing the name of the character encoding.
+     * <p>This method returns without throwing a {@code ServletException} when the login mechanism
+     * configured for the {@code ServletContext} supports username password validation, and when, at
+     * the time of the call to login, the identity of the caller of the request had not been
+     * established (i.e, all of {@code getUserPrincipal}, {@code getRemoteUser}, and
+     * {@code getAuthType} return null), and when validation of the provided credentials is
+     * successful. Otherwise, this method throws a {@code ServletException} as described below.</p>
      *
-     * @throws UnsupportedEncodingException if this ServletRequest is still in a state where a
-     *                                      character encoding may be set, but the specified
-     *                                      encoding is invalid
+     * <p>When this method returns without throwing an exception, it must have established non-null
+     * values as the values returned by {@code getUserPrincipal}, {@code getRemoteUser}, and
+     * {@code getAuthType}.</p>
+     *
+     * @param username The {@code String} value corresponding to the login identifier of the user.
+     * @param password The password {@code String} corresponding to the identified user.
+     *
+     * @throws ServletException if the configured login mechanism does not support username password
+     *                          authentication, or if a non-null caller identity had already been
+     *                          established (prior to the call to login), or if validation of the
+     *                          provided username and password fails.
+     *
+     * @since Servlet 3.0
      */
-    @Override
-    public void setCharacterEncoding(String env) throws UnsupportedEncodingException {
+    public void login(String username, String password) throws ServletException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * Returns the length, in bytes, of the request body and made available by the input stream, or
-     * {@code -1} if the length is not known. For HTTP servlets, same as the value of the CGI
-     * variable {@code CONTENT_LENGTH}.
+     * Establish {@code null} as the value returned when {@code getUserPrincipal},
+     * {@code getRemoteUser}, and {@code getAuthType} is called on the request.
      *
-     * @return an integer containing the length of the request body or {@code -1} if the length is
-     *         not known
+     * @throws ServletException if logout fails
+     *
+     * @since Servlet 3.0
      */
-    @Override
-    public int getContentLength() {
+    public void logout() throws ServletException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * Returns the MIME type of the body of the request, or {@code null} if the type is not known.
-     * For HTTP servlets, same as the value of the CGI variable {@code CONTENT_TYPE}.
+     * Gets all the {@link Part} components of this request, provided that it is of type
+     * {@code multipart/form-data}.
      *
-     * @return a {@code String} containing the name of the MIME type of the request, or
-     *         {@code null} if the type is not known
+     * <p>If this request is of type {@code multipart/form-data}, but does not contain any Part
+     * components, the returned {@code Collection} will be empty.</p>
+     *
+     * <p>Any changes to the returned {@code Collection} must not affect this
+     * {@code HttpServletRequest}.</p>
+     *
+     * @return a (possibly empty) {@code Collection} of the Part components of this request
+     *
+     * @throws IOException           if an I/O error occurred during the retrieval of the
+     *                               {@link Part} components of this request
+     * @throws ServletException      if this request is not of type {@code multipart/form-data}
+     * @throws IllegalStateException if the request body is larger than {@code maxRequestSize}, or
+     *                               any Part in the request is larger than {@code maxFileSize}
+     *
+     * @see javax.servlet.annotation.MultipartConfig#maxFileSize
+     * @see javax.servlet.annotation.MultipartConfig#maxRequestSize
+     *
+     * @since Servlet 3.0
      */
-    @Override
-    public String getContentType() {
+    public Collection<Part> getParts() throws IOException, ServletException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * Retrieves the body of the request as binary data using a {@link ServletInputStream}. Either
-     * this method or {@link #getReader} may be called to read the body, not both.
+     * Gets the {@link Part} with the given name.
      *
-     * @return a {@link ServletInputStream} object containing the body of the request
+     * @param name the name of the requested Part
      *
-     * @throws IllegalStateException if the {@link #getReader} method has already been called for
-     *                               this request
-     * @throws IOException           if an input or output exception occurred
+     * @return The Part with the given name, or {@code null} if this request is of type
+     *         {@code multipart/form-data}, but does not contain the requested Part
+     *
+     * @throws IOException           if an I/O error occurred during the retrieval of the requested
+     *                               Part
+     * @throws ServletException      if this request is not of type {@code multipart/form-data}
+     * @throws IllegalStateException if the request body is larger than {@code maxRequestSize}, or
+     *                               any Part in the request is larger than {@code maxFileSize}
+     *
+     * @see javax.servlet.annotation.MultipartConfig#maxFileSize
+     * @see javax.servlet.annotation.MultipartConfig#maxRequestSize
+     *
+     * @since Servlet 3.0
      */
-    @Override
-    public ServletInputStream getInputStream() throws IOException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns the value of a request parameter as a {@code String}, or {@code null} if the
-     * parameter does not exist. Request parameters are extra information sent with the request.
-     * For HTTP servlets, parameters are contained in the query string or posted form data.
-     *
-     * <p>You should only use this method when you are sure the parameter has only one value. If
-     * the parameter might have more than one value, use {@link #getParameterValues}.</p>
-     *
-     * <p>If you use this method with a multivalued parameter, the value returned is equal to the
-     * first value in the array returned by {@code getParameterValues}.</p>
-     *
-     * <p>If the parameter data was sent in the request body, such as occurs with an HTTP POST
-     * request, then reading the body directly via {@link #getInputStream} or {@link #getReader}
-     * can interfere with the execution of this method.</p>
-     *
-     * @param name a {@code String} specifying the name of the parameter
-     *
-     * @return a {@code String} representing the single value of the parameter
-     *
-     * @see #getParameterValues
-     */
-    @Override
-    public String getParameter(String name) {
-        final List<String> values = parameters.get(name);
-        return values == null || values.isEmpty() ? null : values.get(0);
-    }
-
-    /**
-     * Returns an {@code Enumeration} of {@code String} objects containing the names of the
-     * parameters contained in this request. If the request has no parameters, the method returns
-     * an empty {@code Enumeration}.
-     *
-     * @return an {@code Enumeration} of {@code String} objects, each {@code String} containing the
-     *         name of a request parameter; or an empty {@code Enumeration} if the request has no
-     *         parameters
-     */
-    @Override
-    @SuppressWarnings("rawtypes")
-    public Enumeration getParameterNames() {
-        return Collections.enumeration(parameters.keySet());
-    }
-
-    /**
-     * Returns an array of {@code String} objects containing all of the values the given request
-     * parameter has, or {@code null} if the parameter does not exist.
-     *
-     * <p>If the parameter has a single value, the array has a length of {@code 1}.</p>
-     *
-     * @param name a {@code String} containing the name of the parameter whose value is requested
-     *
-     * @return an array of {@code String} objects containing the parameter's values
-     *
-     * @see #getParameter
-     */
-    @Override
-    public String[] getParameterValues(String name) {
-        final List<String> values = parameters.get(name);
-        return values == null || values.isEmpty() ? null : values.toArray(new String[0]);
-    }
-
-    /**
-     * Returns a Map of the parameters of this request. Request parameters are extra information
-     * sent with the request. For HTTP servlets, parameters are contained in the query string or
-     * posted form data.
-     *
-     * @return an immutable Map containing parameter names as keys and parameter values as map
-     *         values. The keys in the parameter map are of type String. The values in the
-     *         parameter map are of type String array.
-     */
-    @Override
-    @SuppressWarnings("rawtypes")
-    public Map getParameterMap() {
-        final LinkedHashMap<String, String[]> ret = new LinkedHashMap<>(parameters.size());
-
-        for (Entry<String, ArrayList<String>> entry : parameters.entrySet()) {
-            ret.put(entry.getKey(), entry.getValue().toArray(new String[0]));
-        }
-
-        return Collections.unmodifiableMap(ret);
-    }
-
-    /**
-     * Returns the name and version of the protocol the request uses in the form
-     * <i>protocol/majorVersion.minorVersion</i>, for example, HTTP/1.1. For HTTP servlets, the
-     * value returned is the same as the value of the CGI variable {@code SERVER_PROTOCOL}.
-     *
-     * @return a {@code String} containing the protocol name and version number
-     */
-    @Override
-    public String getProtocol() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns the name of the scheme used to make this request, for example, {@code http},
-     * {@code https}, or {@code ftp}. Different schemes have different rules for constructing URLs,
-     * as noted in <a href="https://datatracker.ietf.org/doc/html/rfc1738">RFC 1738</a>.
-     *
-     * @return a {@code String} containing the name of the scheme used to make this request
-     */
-    @Override
-    public String getScheme() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns the host name of the server to which the request was sent. It is the value of the
-     * part before ":" in the {@code Host} header value, if any, or the resolved server name, or
-     * the server IP address.
-     *
-     * @return a {@code String} containing the name of the server
-     */
-    @Override
-    public String getServerName() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns the port number to which the request was sent. It is the value of the part after ":"
-     * in the {@code Host} header value, if any, or the server port where the client connection was
-     * accepted on.
-     *
-     * @return an integer specifying the port number
-     */
-    @Override
-    public int getServerPort() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Retrieves the body of the request as character data using a {@code BufferedReader}. The
-     * reader translates the character data according to the character encoding used on the body.
-     * Either this method or {@link #getInputStream} may be called to read the body, not both.
-     *
-     * @return a {@code BufferedReader} containing the body of the request
-     *
-     * @throws UnsupportedEncodingException if the character set encoding used is not supported and
-     *                                      the text cannot be decoded
-     * @throws IllegalStateException        if {@link #getInputStream} method has been called on
-     *                                      this request
-     * @throws IOException                  if an input or output exception occurred
-     *
-     * @see #getInputStream
-     */
-    @Override
-    public BufferedReader getReader() throws IOException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns the Internet Protocol (IP) address of the client or last proxy that sent the
-     * request. For HTTP servlets, same as the value of the CGI variable {@code REMOTE_ADDR}.
-     *
-     * @return a {@code String} containing the IP address of the client that sent the request
-     */
-    @Override
-    public String getRemoteAddr() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns the fully qualified name of the client or the last proxy that sent the request. If
-     * the engine cannot or chooses not to resolve the hostname (to improve performance), this
-     * method returns the dotted-string form of the IP address. For HTTP servlets, same as the
-     * value of the CGI variable {@code REMOTE_HOST}.
-     *
-     * @return a {@code String} containing the fully qualified name of the client
-     */
-    @Override
-    public String getRemoteHost() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Stores an attribute in this request. Attributes are reset between requests. This method is
-     * most often used in conjunction with {@link RequestDispatcher}.
-     *
-     * <p>Attribute names should follow the same conventions as package names. Names beginning with
-     * {@code java.*}, {@code javax.*}, and {@code com.sun.*}, are reserved for use by Sun
-     * Microsystems.<br>
-     * If the object passed in is {@code null}, the effect is the same as calling
-     * {@link #removeAttribute}.<br>
-     * It is warned that when the request is dispatched from the servlet resides in a different web
-     * application by {@code RequestDispatcher}, the object set by this method may not be correctly
-     * retrieved in the caller servlet.</p>
-     *
-     * @param name a {@code String} specifying the name of the attribute
-     * @param o    the {@code Object} to be stored
-     */
-    @Override
-    public void setAttribute(String name, Object o) {
-        if (name == null) {
-            throw new IllegalArgumentException("Attribute name cannot be null");
-        }
-
-        if (o == null) {
-            removeAttribute(name);
-            return;
-        }
-
-        attributes.put(name, o);
-    }
-
-    /**
-     * Removes an attribute from this request. This method is not generally needed as attributes
-     * only persist as long as the request is being handled.
-     *
-     * <p>Attribute names should follow the same conventions as package names. Names beginning with
-     * {@code java.*}, {@code javax.*}, and {@code com.sun.*}, are reserved for use by Sun
-     * Microsystems.</p>
-     *
-     * @param name a {@code String} specifying the name of the attribute to remove
-     */
-    @Override
-    public void removeAttribute(String name) {
-        attributes.remove(name);
-    }
-
-    /**
-     * Returns the preferred {@code Locale} that the client will accept content in, based on the
-     * {@code Accept-Language} header. If the client request doesn't provide an
-     * {@code Accept-Language} header, this method returns the default locale for the server.
-     *
-     * @return the preferred {@code Locale} for the client
-     */
-    @Override
-    public Locale getLocale() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns an {@code Enumeration} of {@code Locale} objects indicating, in decreasing order
-     * starting with the preferred locale, the locales that are acceptable to the client based on
-     * the {@code Accept-Language} header. If the client request doesn't provide an
-     * {@code Accept-Language} header, this method returns an {@code Enumeration} containing one
-     * {@code Locale}, the default locale for the server.
-     *
-     * @return an {@code Enumeration} of preferred {@code Locale} objects for the client
-     */
-    @Override
-    @SuppressWarnings("rawtypes")
-    public Enumeration getLocales() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns a boolean indicating whether this request was made using a secure channel, such as
-     * HTTPS.
-     *
-     * @return a boolean indicating if the request was made using a secure channel
-     */
-    @Override
-    public boolean isSecure() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns a {@link RequestDispatcher} object that acts as a wrapper for the resource located
-     * at the given path. A {@code RequestDispatcher} object can be used to forward a request to
-     * the resource or to include the resource in a response. The resource can be dynamic or
-     * static.
-     *
-     * <p>The pathname specified may be relative, although it cannot extend outside the current
-     * servlet context. If the path begins with a "/" it is interpreted as relative to the current
-     * context root. This method returns {@code null} if the servlet container cannot return a
-     * {@code RequestDispatcher}.</p>
-     *
-     * <p>The difference between this method and {@link ServletContext#getRequestDispatcher} is
-     * that this method can take a relative path.</p>
-     *
-     * @param path a {@code String} specifying the pathname to the resource. If it is relative, it
-     *             must be relative against the current servlet.
-     *
-     * @return a {@code RequestDispatcher} object that acts as a wrapper for the resource at the
-     *         specified path, or {@code null} if the servlet container cannot return a
-     *         {@code RequestDispatcher}
-     *
-     * @see RequestDispatcher
-     * @see ServletContext#getRequestDispatcher
-     */
-    @Override
-    public RequestDispatcher getRequestDispatcher(String path) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Applies alias rules to the specified virtual path in URL path format, that is,
-     * {@code /dir/dir/filename.ext}. Returns a String representing the corresponding real path in
-     * the format that is appropriate for the machine (including the proper path separators) that
-     * the servlet engine is running on.
-     *
-     * <p>Returns {@code null} if the translation could not be performed for any reason.</p>
-     *
-     * @deprecated As of Version 2.1 of the Java Servlet API, use
-     *             {@link ServletContext#getRealPath} instead.
-     */
-    @Override
-    @Deprecated
-    public String getRealPath(String path) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns the Internet Protocol (IP) source port of the client or last proxy that sent the
-     * request.
-     *
-     * @return an integer specifying the port number
-     *
-     * @since 2.4
-     */
-    @Override
-    public int getRemotePort() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns the host name of the Internet Protocol (IP) interface on which the request was
-     * received.
-     *
-     * @return a {@code String} containing the host name of the IP on which the request was
-     *         received.
-     *
-     * @since 2.4
-     */
-    @Override
-    public String getLocalName() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns the Internet Protocol (IP) address of the interface on which the request was
-     * received.
-     *
-     * @return a {@code String} containing the IP address on which the request was received.
-     *
-     * @since 2.4
-     */
-    @Override
-    public String getLocalAddr() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns the Internet Protocol (IP) port number of the interface on which the request was
-     * received.
-     *
-     * @return an integer specifying the port number
-     *
-     * @since 2.4
-     */
-    @Override
-    public int getLocalPort() {
+    public Part getPart(String name) throws IOException, ServletException {
         throw new UnsupportedOperationException();
     }
 }

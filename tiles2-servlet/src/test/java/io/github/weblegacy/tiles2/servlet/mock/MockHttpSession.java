@@ -26,12 +26,54 @@ import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionActivationListener;
+import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionContext;
 
 /**
  * The mock-class for {@link HttpSession}.
+ *
+ * <p>Provides a way to identify a user across more than one page request or visit to a Web site and
+ * to store information about that user.</p>
+ *
+ * <p>The servlet container uses this interface to create a session between an HTTP client and an
+ * HTTP server. The session persists for a specified time period, across more than one connection or
+ * page request from the user. A session usually corresponds to one user, who may visit a site many
+ * times. The server can maintain a session in many ways such as using cookies or rewriting
+ * URLs.</p>
+ *
+ * <p>This interface allows servlets to</p>
+ *
+ * <ul>
+ * <li>View and manipulate information about a session, such as the session identifier, creation
+ *     time, and last accessed time</li>
+ * <li>Bind objects to sessions, allowing user information to persist across multiple user
+ *     connections</li>
+ * </ul>
+ *
+ * <p>When an application stores an object in or removes an object from a session, the session
+ * checks whether the object implements {@link HttpSessionBindingListener}. If it does, the servlet
+ * notifies the object that it has been bound to or unbound from the session. Notifications are sent
+ * after the binding methods complete. For session that are invalidated or expire, notifications are
+ * sent after the session has been invalidated or expired.</p>
+ *
+ * <p>When container migrates a session between VMs in a distributed container setting, all session
+ * attributes implementing the {@link HttpSessionActivationListener} interface are notified.</p>
+ *
+ * <p>A servlet should be able to handle cases in which the client does not choose to join a
+ * session, such as when cookies are intentionally turned off. Until the client joins the session,
+ * {@code isNew} returns {@code true}. If the client chooses not to join the session,
+ * {@code getSession} will return a different session on each request, and {@code isNew} will always
+ * return {@code true}.</p>
+ *
+ * <p>Session information is scoped only to the current web application ({@code ServletContext}), so
+ * information stored in one context will not be directly visible in another.</p>
+ *
+ * @author Various
+ *
+ * @see HttpSessionBindingListener
+ * @see HttpSessionContext
  */
-@SuppressWarnings("deprecation")
 public class MockHttpSession implements HttpSession {
 
     /**
@@ -95,7 +137,7 @@ public class MockHttpSession implements HttpSession {
      *
      * @return The ServletContext object for the web application
      *
-     * @since 2.3
+     * @since Servlet 2.3
      */
     @Override
     public ServletContext getServletContext() {
@@ -104,7 +146,10 @@ public class MockHttpSession implements HttpSession {
 
     /**
      * Specifies the time, in seconds, between client requests before the servlet container will
-     * invalidate this session. A negative time indicates the session should never timeout.
+     * invalidate this session.
+     *
+     * <p>An {@code interval} value of zero or less indicates that the session should never
+     * timeout.</p>
      *
      * @param interval An integer specifying the number of seconds
      */
@@ -117,8 +162,9 @@ public class MockHttpSession implements HttpSession {
      * Returns the maximum time interval, in seconds, that the servlet container will keep this
      * session open between client accesses. After this interval, the servlet container will
      * invalidate the session. The maximum time interval can be set with the
-     * {@link #setMaxInactiveInterval} method. A negative time indicates the session should never
-     * timeout.
+     * {@link #setMaxInactiveInterval} method.
+     *
+     * <p>A return value of zero or less indicates that the session will never timeout.</p>
      *
      * @return an integer specifying the number of seconds this session remains open between client
      *         requests
@@ -188,8 +234,7 @@ public class MockHttpSession implements HttpSession {
      * @throws IllegalStateException if this method is called on an invalidated session
      */
     @Override
-    @SuppressWarnings("rawtypes")
-    public Enumeration getAttributeNames() {
+    public Enumeration<String> getAttributeNames() {
         return Collections.enumeration(attributes.keySet());
     }
 
